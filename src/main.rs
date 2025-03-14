@@ -1,3 +1,8 @@
+use crate::server::start_server;
+
+mod leibniz_adder;
+mod server;
+
 fn main() {
-    println!("Hello, world!");
+    start_server();
 }
