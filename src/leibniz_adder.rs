@@ -1,9 +1,5 @@
 pub fn get_term(i: i32) -> f64 {
-    let mut total = 0.0;
-    for x in 0..i+1 {
-        total += term(x) * 4f64;
-    }
-    total
+    (0..i + 1).map(|x| term(x)).sum::<f64>() * 4f64
 }
 
 fn term(i: i32) -> f64 {

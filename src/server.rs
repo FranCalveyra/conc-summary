@@ -48,6 +48,7 @@ fn parse_line(request_line: &String) -> f64 {
         if let Some(captured_params) = extract_path_param(path, "/pi/:i") {
             if let Some(term) = captured_params.get("i") {
                 println!("Extracted Term: {}", &term);
+                // TODO: add error handling for Overflow
                 let leibniz_term = get_term(term.parse::<i32>().unwrap());
                 return leibniz_term;
             }
