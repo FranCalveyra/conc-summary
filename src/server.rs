@@ -2,6 +2,7 @@ use crate::leibniz_adder::get_term;
 use std::collections::HashMap;
 use std::io::{BufRead, BufReader, Write};
 use std::net::{TcpListener, TcpStream};
+use std::time::{Duration, Instant};
 
 pub fn start_server() {
     let listener = TcpListener::bind("127.0.0.1:8080").unwrap();
@@ -20,14 +21,17 @@ fn handle_connection(mut stream: TcpStream) {
         .take_while(|line| !line.is_empty())
         .collect();
     let line = &http_request[0];
+    let current_time = Instant::now(); // Time before processing
 
     let leibniz_term = parse_line(&line);
+
+    let elapsed_time = current_time.elapsed();
     if leibniz_term == -1f64 {
         &stream
             .write_all("Error calculating series".as_bytes())
             .unwrap();
     }
-    let response_body = leibniz_term.to_string();
+    let response_body = build_response(leibniz_term, elapsed_time);
     let response = format!(
         "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nContent-Type: text/plain\r\n\r\n{}",
         response_body.len(),
@@ -36,6 +40,14 @@ fn handle_connection(mut stream: TcpStream) {
     &stream.write(response.as_bytes()).unwrap();
 
     println!("Request: {line:#?}")
+}
+
+fn build_response(leibniz_term: f64, elapsed_time: Duration) -> String {
+    format!(
+        "Calculated PI value: {} \n Elapsed time in milliseconds: {}",
+        leibniz_term.to_string(),
+        elapsed_time.as_millis()
+    )
 }
 
 fn parse_line(request_line: &String) -> f64 {
