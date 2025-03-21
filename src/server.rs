@@ -1,45 +1,58 @@
-use crate::leibniz_adder::get_term;
+use crate::errors::Errors;
+use crate::leibniz_adder::get_leibniz_term;
 use std::collections::HashMap;
 use std::io::{BufRead, BufReader, Write};
 use std::net::{TcpListener, TcpStream};
+use std::thread;
 use std::time::{Duration, Instant};
 
 pub fn start_server() {
     let listener = TcpListener::bind("127.0.0.1:8080").unwrap();
     for stream in listener.incoming() {
         let stream = stream.unwrap();
-        handle_connection(stream);
+
+        // Silliest approach (?
+        thread::spawn(|| handle_connection(stream));
     }
 }
 
 fn handle_connection(mut stream: TcpStream) {
     let buf_reader = BufReader::new(&stream);
 
-    let http_request: Vec<_> = buf_reader
-        .lines()
-        .map(|result| result.unwrap())
-        .take_while(|line| !line.is_empty())
-        .collect();
-    let line = &http_request[0];
+    let lines = get_request_line(buf_reader);
+
+    let line = &lines[0];
+
     let current_time = Instant::now(); // Time before processing
 
     let leibniz_term = parse_line(&line);
 
-    let elapsed_time = current_time.elapsed();
-    if leibniz_term == -1f64 {
-        &stream
-            .write_all("Error calculating series".as_bytes())
-            .unwrap();
+    let elapsed_time = current_time.elapsed(); // Processing duration time
+
+    if leibniz_term.is_err() {
+        let mut error_message: String = String::new();
+        if let Some(err) = leibniz_term.err() {
+            println!("Got an error");
+            error_message = err.to_string();
+        }
+
+        &stream.write_all(error_message.as_bytes()).unwrap();
+        return;
     }
-    let response_body = build_response(leibniz_term, elapsed_time);
+
+    let unwrapped_term = leibniz_term.unwrap();
+
+    write_response(&mut stream, elapsed_time, unwrapped_term);
+}
+
+fn write_response(stream: &mut TcpStream, elapsed_time: Duration, unwrapped_term: f64) {
+    let response_body = build_response(unwrapped_term, elapsed_time);
     let response = format!(
         "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nContent-Type: text/plain\r\n\r\n{}",
         response_body.len(),
         response_body
     );
     &stream.write(response.as_bytes()).unwrap();
-
-    println!("Request: {line:#?}")
 }
 
 fn build_response(leibniz_term: f64, elapsed_time: Duration) -> String {
@@ -50,7 +63,7 @@ fn build_response(leibniz_term: f64, elapsed_time: Duration) -> String {
     )
 }
 
-fn parse_line(request_line: &String) -> f64 {
+fn parse_line(request_line: &String) -> Result<f64, Errors> {
     println!("Request Line: {}", request_line);
 
     let parts: Vec<&str> = request_line.split_whitespace().collect();
@@ -60,13 +73,23 @@ fn parse_line(request_line: &String) -> f64 {
         if let Some(captured_params) = extract_path_param(path, "/pi/:i") {
             if let Some(term) = captured_params.get("i") {
                 println!("Extracted Term: {}", &term);
-                // TODO: add error handling for Overflow
-                let leibniz_term = get_term(term.parse::<i32>().unwrap());
-                return leibniz_term;
+
+                let parsed_number = term.parse::<i32>();
+                if parsed_number.is_err() {
+                    return Err(Errors::ParseNumberError);
+                }
+
+                let number = parsed_number.unwrap();
+                if number > i32::MAX {
+                    return Err(Errors::OverflowError);
+                }
+
+                let leibniz_term = get_leibniz_term(0, number);
+                return Ok(leibniz_term);
             }
         }
     }
-    -1f64
+    Err(Errors::MessageError(String::from("Unable to read line")))
 }
 
 fn extract_path_param(url: &str, pattern: &str) -> Option<HashMap<String, String>> {
@@ -88,4 +111,13 @@ fn extract_path_param(url: &str, pattern: &str) -> Option<HashMap<String, String
     }
 
     Some(params)
+}
+
+fn get_request_line(buf_reader: BufReader<&TcpStream>) -> Vec<String> {
+    let http_request: Vec<_> = buf_reader
+        .lines()
+        .map(|result| result.unwrap())
+        .take_while(|line| !line.is_empty())
+        .collect();
+    http_request
 }
