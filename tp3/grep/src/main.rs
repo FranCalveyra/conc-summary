@@ -1,0 +1,35 @@
+mod search_types;
+mod grep;
+mod file_processor;
+mod sequence_searcher;
+mod errors;
+
+use std::env;
+use crate::search_types::SearchType;
+use crate::grep::grep;
+
+fn main () {
+    let args: Vec<String> = env::args().collect();
+    if args.len() < 4 {
+        eprintln!("Usage: cargo run -- <search_type> <search_term> <file1> <file2> ...");
+        std::process::exit(1);
+    }
+
+    let search_type = get_search_type(&args[1]);
+    let search_term = &args[2];
+    let files = &args[3..];
+
+    grep(search_type, search_term.to_string(), files.to_vec());
+}
+
+fn get_search_type(search_type: &String) -> SearchType {
+    match search_type.as_str() {
+        "seq" => SearchType::Sequential,
+        "conc" => SearchType::Concurrent,
+        "c-chunk" => SearchType::ChunkConcurrent,
+        _ => {
+            eprintln!("Invalid search type: {}", search_type);
+            std::process::exit(1);
+        }
+    }
+}
