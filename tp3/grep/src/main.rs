@@ -9,8 +9,8 @@ use crate::search_types::SearchType;
 use crate::grep::grep;
 
 fn main () {
-    // let args: Vec<String> = env::args().collect();
-    let args: Vec<String> = Vec::from(&["", "conc", "man", "resources/bible.txt"].map(|s| s.to_string()));
+    let args: Vec<String> = env::args().collect();
+    // let args: Vec<String> = Vec::from(&["", "c-chunk", "man", "resources/bible.txt"].map(|s| s.to_string()));
     if args.len() < 4 {
         eprintln!("Usage: cargo run -- <search_type> <search_term> <file1> <file2> ...");
         std::process::exit(1);

@@ -1,7 +1,6 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::ops::Div;
-use std::ptr::read;
 use std::thread;
 
 pub fn find_sequence_in_file(
@@ -25,28 +24,27 @@ pub fn find_sequence_in_file_per_chunk(
 
     let lines: Vec<String> = buf_reader.lines().map(|line| line.unwrap()).collect();
 
-    // let mut chunks:i32 = (lines.len() as i32).div(chunk_size);
+    let chunks: i32 = (lines.len() as i32).div(chunk_size);
 
-    // println!("Initial chunks: {chunks}");
-    //
-    // let mut result: Vec<Vec<String>> = Vec::new();
-    //
-    // while chunks>0{
-    //     thread::spawn(|| {
-    //         result.push(lines[ (chunk_size*(chunks-1)) as usize..(chunk_size*chunks) as usize]
-    //             .iter()
-    //             .filter(|line| line.contains(pattern))
-    //             .cloned()
-    //             .collect::<Vec<String>>());
-    //     });
-    //
-    //
-    //     chunks -=1;
-    //
-    //     println!("Current chunks: {chunks}");
-    // }
-    //
-    // result.into_iter().flatten().collect()
+    let mut threads = vec![];
 
-    Vec::new()
+    for chunk in 0..chunks {
+        let pattern_copy = pattern.clone();
+        let lines_copy = lines.clone();
+        let handle = thread::spawn(move || {
+            lines_copy[(chunk_size * chunk) as usize..(chunk_size * (chunk + 1)) as usize]
+                .iter()
+                .filter(|line| line.contains(&pattern_copy))
+                .cloned()
+                .collect::<Vec<String>>()
+        });
+        threads.push(handle);
+    }
+
+    let mut result = vec![];
+    for thread in threads {
+        result.extend(thread.join().unwrap());
+    }
+
+    result
 }

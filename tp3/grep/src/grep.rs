@@ -3,7 +3,7 @@ use crate::search_types::SearchType;
 use crate::file_processor::get_file_reader;
 use crate::sequence_searcher::{find_sequence_in_file, find_sequence_in_file_per_chunk};
 
-const CHUNK_SIZE: i32 = 100; // Line amount
+const CHUNK_SIZE: i32 = 500; // Line amount
 
 
 trait Grep{
