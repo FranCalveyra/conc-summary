@@ -1,27 +1,60 @@
+use std::thread;
 use crate::search_types::SearchType;
 use crate::file_processor::get_file_reader;
-use crate::sequence_searcher::find_sequence_in_file;
+use crate::sequence_searcher::{find_sequence_in_file, find_sequence_in_file_per_chunk};
+
+const CHUNK_SIZE: i32 = 100; // Line amount
+
+
+trait Grep{
+    fn find_sequence_in_file(&self, pattern : &String, file_paths: Vec<String>) -> Vec<String>;
+}
+
+impl Grep for SearchType{
+    fn find_sequence_in_file(&self, pattern: &String, file_paths: Vec<String>) -> Vec<String> {
+        let mut lines: Vec<String> = Vec::new();
+        match self {
+            SearchType::Sequential => {
+                lines = sequential_grep(&pattern, file_paths);
+            },
+            SearchType::Concurrent => { lines = concurrent_grep(&pattern, file_paths); },
+            SearchType::ChunkConcurrent => {lines = chunk_concurrent_grep(&pattern, file_paths);},
+        }
+        lines
+    }
+}
+
 
 pub fn grep (search_type: SearchType, search_term: String, file_paths: Vec<String>) {
-    // TODO: differ behaviour with a trait
+    let lines = search_type.find_sequence_in_file(&search_term, file_paths);
 
-    /*
-    match search_type{
-        Sequential => read one by one
-        Concurrent => use threads for each file
-        C-Chunk => use N threads simultaneously (with N being chunk size)
-    }
-     */
+    lines.iter().for_each(|line| println!("{}", line))
 
+}
 
-    let lines: Vec<_> =
-        file_paths.iter()
+fn sequential_grep(search_term: &String, file_paths: Vec<String>) -> Vec<String> {
+    file_paths
+        .into_iter()
             .map(|path| get_file_reader(path.to_string()).unwrap())
             .map(|reader| find_sequence_in_file(reader, &search_term))
-            .collect();
-    for line in lines {
-        for l in line {
-            println!("{}", l);
-        }
-    }
+        .flatten()
+        .collect()
+}
+
+fn concurrent_grep(search_term: &String, file_paths: Vec<String>) -> Vec<String> {
+    file_paths
+        .into_iter()
+        .map(|path| thread::spawn(move || get_file_reader(path.to_string()).unwrap()).join().unwrap())
+        .map(|reader| find_sequence_in_file(reader, &search_term))
+        .flatten()
+        .collect()
+}
+
+fn chunk_concurrent_grep(search_term: &String, file_paths: Vec<String>)-> Vec<String> {
+    file_paths
+        .into_iter()
+        .map(|path| thread::spawn(move || get_file_reader(path.to_string()).unwrap()).join().unwrap())
+        .map(|reader| find_sequence_in_file_per_chunk(reader, &search_term, CHUNK_SIZE))
+        .flatten()
+        .collect()
 }
