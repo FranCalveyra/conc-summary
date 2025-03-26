@@ -5,10 +5,17 @@ mod sequence_searcher;
 mod errors;
 
 use std::env;
+use std::time::Instant;
 use crate::search_types::SearchType;
 use crate::grep::grep;
 
 fn main () {
+    let current_time = Instant::now();
+    terminal_grep();
+    println!("\nElapsed time in millis: {}", current_time.elapsed().as_millis());
+}
+
+fn terminal_grep() {
     let args: Vec<String> = env::args().collect();
     // let args: Vec<String> = Vec::from(&["", "c-chunk", "man", "resources/bible.txt"].map(|s| s.to_string()));
     if args.len() < 4 {
