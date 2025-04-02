@@ -1,16 +1,27 @@
 use crate::server::start_server;
 
+mod errors;
 mod leibniz_adder;
 mod server;
-mod errors;
-/*
-TODO:
-- Clean code
-    - Differ request by method type (GET, POST, etc.)
-- TP2 Requirements
-- Start TP3
- */
+mod thread_pool;
 
-fn main() {
-    start_server();
-}
+// Concurrent approach
+
+// fn main() { start_server() }
+// Testing request with n = 500, c = 50
+// With pi = 9_000_000, it lasts 3.5 secs avg.
+
+
+fn main() { start_server() }
+// Testing request with n = 500, c = 100
+// With pi = 9_000_000, it lasts 7.5 secs avg.
+
+
+// ThreadPool approach
+// fn main() {start_pool_server(thread_pool::get_system_thread_amount())}
+// Testing request with n = 500, c = 50
+// With pi = 9_000_000 and 8 threads, it lasts 3.0 secs avg.
+
+// fn main() {start_pool_server(8)}
+// Testing request with n = 500, c = 100
+// With pi = 9_000_000 and 8 threads, it lasts 5.7 secs avg.

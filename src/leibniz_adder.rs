@@ -1,4 +1,3 @@
-use std::ops::Div;
 use std::thread;
 
 const LEIBNIZ_THRESHOLD: i32 = 200000;
