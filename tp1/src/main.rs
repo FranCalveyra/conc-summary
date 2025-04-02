@@ -2,8 +2,8 @@ use crate::server::start_server;
 
 mod errors;
 mod leibniz_adder;
-mod server;
-mod thread_pool;
+pub mod server;
+pub mod thread_pool;
 
 // Concurrent approach
 
@@ -25,3 +25,11 @@ fn main() { start_server() }
 // fn main() {start_pool_server(8)}
 // Testing request with n = 500, c = 100
 // With pi = 9_000_000 and 8 threads, it lasts 5.7 secs avg.
+
+mod tests{
+    use crate::thread_pool;
+    #[test]
+    fn assert_available_cores() {
+        assert_eq!(thread_pool::get_system_thread_amount(), 8) // Depends on system
+    }
+}

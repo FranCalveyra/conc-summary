@@ -1,13 +1,8 @@
-mod search_types;
-mod grep;
-mod file_processor;
-mod sequence_searcher;
-mod errors;
+use grep_lib::search_types::SearchType;
+use grep_lib::grep::grep;
 
 use std::env;
 use std::time::Instant;
-use crate::search_types::SearchType;
-use crate::grep::grep;
 
 fn main () {
     let current_time = Instant::now();

@@ -1,11 +1,11 @@
-mod errors;
-mod file_processor;
-mod search_types;
-mod sequence_searcher;
-mod grep;
+pub mod file_processor;
+pub mod sequence_searcher;
+pub mod errors;
+pub mod search_types;
+pub mod grep;
 
-#[cfg(test)]
 mod tests {
+    // TODO: add more tests
     use crate::file_processor::get_file_reader;
     use crate::sequence_searcher::find_sequence_in_file;
 
