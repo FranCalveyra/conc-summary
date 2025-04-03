@@ -12,10 +12,3 @@ dependencies = [
 [[package]]
 name = "leibniz-calculator"
 version = "0.1.0"
-
-[[package]]
-name = "tp1"
-version = "0.1.0"
-dependencies = [
- "connection-handler",
-]
