@@ -6,7 +6,7 @@ use std::thread::JoinHandle;
 
 const CHUNK_SIZE: i32 = 20000; // Line amount
 
-trait Grep {
+pub trait Grep {
     fn find_sequence_in_file(&self, pattern: &String, file_paths: Vec<String>) -> Vec<String>;
 }
 
