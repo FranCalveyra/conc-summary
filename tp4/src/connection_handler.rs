@@ -1,10 +1,11 @@
-use crate::errors::Error;
-use crate::log_analyzer::{get_stats, process_file};
-use crate::server::{Response, Server};
-use std::cmp::PartialEq;
-use std::io::{BufRead, BufReader, Write};
+use crate::request_handler::{get_request_line, parse_line};
+use std::collections::HashMap;
+use std::io::{BufReader, Write};
 use std::net::TcpStream;
 use std::sync::Arc;
+use crate::http_method::HttpMethod;
+use crate::response::Response;
+use crate::server::Server;
 
 pub fn handle_connection(mut stream: TcpStream, server: Arc<Server>) {
     let buf_reader = BufReader::new(&stream);
@@ -44,51 +45,33 @@ fn invalid_route() -> Response {
     )
 }
 
-#[derive(Eq, PartialEq)]
-enum HttpMethod {
-    GET,
-    POST,
-    PUT,
-    DELETE,
+fn get_stats(server: Arc<Server>) -> Response {
+    let exceptions: i64 = server.clone().get_exceptions();
+    let body = format!(
+        "Total exceptions: {exceptions}\nFiles processed: {}\nPer file:{}\n",
+        server.file_stats.try_read().unwrap().len(),
+        format_map(&server.file_stats.try_read().unwrap())
+    );
+    Response::new(200, body)
 }
 
-pub fn method_handler(method: &str) -> HttpMethod {
-    match method {
-        "GET" => HttpMethod::GET,
-        "POST" => HttpMethod::POST,
-        "PUT" => HttpMethod::PUT,
-        "DELETE" => HttpMethod::DELETE,
-        _ => HttpMethod::GET, //Default => Get
-    }
+fn process_file(stream: &mut TcpStream, server: Arc<Server>) -> Response {
+    // TODO: check border cases (server is full, file not specified)
+    Response::new(200, "".to_string())
 }
 
-fn get_request_line(buf_reader: BufReader<&TcpStream>) -> Vec<String> {
-    let http_request: Vec<_> = buf_reader
-        .lines()
-        .map(|result| result.unwrap())
-        .take_while(|line| !line.is_empty())
-        .collect();
-    http_request
-}
+fn format_map(map: &HashMap<String, usize>) -> String {
+    let mut formatted = String::from("{");
 
-fn parse_line(request_line: &String) -> Result<(HttpMethod, &str), Error> {
-    println!("Request Line: {}", request_line);
+    let entries = map
+        .iter()
+        .map(|(key, value)| format!("\"{}\": {}", key, value))
+        .collect::<Vec<_>>();
 
-    let parts: Vec<&str> = request_line.split_whitespace().collect();
-    if parts.len() > 1 {
-        let method_string = parts[0];
-        let method = method_handler(method_string);
-        let path = parts[1];
+    formatted.push_str(&entries.join(", "));
+    formatted.push('}');
 
-        let segments: Vec<&str> = path.trim_matches('/').split('/').collect();
-        if segments.len() == 1 {
-            Ok((method, segments[0]))
-        } else {
-            Err(Error::InvalidRoute)
-        }
-    } else {
-        Err(Error::InvalidRoute)
-    }
+    formatted
 }
 
 fn write_response(stream: &mut TcpStream, response: Response) {

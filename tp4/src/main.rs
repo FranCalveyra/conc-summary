@@ -14,10 +14,13 @@ Requerimientos:
 /*
   => No persistimos los archivos, matcheamos por nombre y punto
 */
-mod connection_handler;
-mod errors;
-mod log_analyzer;
-mod server;
+pub mod connection_handler;
+pub mod errors;
+pub mod http_method;
+pub mod log_analyzer;
+pub mod request_handler;
+pub mod response;
+pub mod server;
 
 use std::sync::Arc;
 use thread_pool::thread_pool::get_system_thread_amount;

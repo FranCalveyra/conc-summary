@@ -1,6 +1,6 @@
 use crate::connection_handler::handle_connection;
 use std::collections::HashMap;
-use std::fmt::{Display, Formatter};
+use std::fmt::Display;
 use std::net::TcpListener;
 use std::sync::{Arc, RwLock};
 use thread_pool::thread_pool::ThreadPool;
@@ -20,7 +20,7 @@ impl Server {
     }
     pub fn start(self: Arc<Self>, thread_amount: usize) {
         let listener = TcpListener::bind("127.0.0.1:3030").unwrap();
-        let pool = ThreadPool::new(thread_amount); // TODO: use tokio
+        let pool = ThreadPool::new(thread_amount);
         for stream in listener.incoming() {
             let stream = stream.unwrap();
             let server_ref = Arc::clone(&self);
@@ -34,40 +34,5 @@ impl Server {
             .values()
             .map(|&v| v as i64)
             .sum()
-    }
-}
-
-pub struct Response {
-    pub status_code: i32,
-    pub body: String,
-}
-
-impl Response {
-    pub fn new(status_code: i32, body: String) -> Self {
-        Response { status_code, body }
-    }
-    fn status(&self) -> String {
-        let status_string = match self.status_code {
-            200 => "OK",
-            201 => "Created",
-            429 => "Too Many Requests",
-            400 => "Bad Request",
-            500 => "Internal Server Error",
-            _ => "Unknown Error",
-        };
-        String::from(status_string)
-    }
-}
-
-impl Display for Response {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let string = format!(
-            "HTTP/1.1 {} {}\r\nContent-Length: {}\r\nContent-Type: text/plain\r\n\r\n{}",
-            self.status_code,
-            self.status(),
-            self.body.len(),
-            self.body,
-        );
-        write!(f, "{}", string)
     }
 }
