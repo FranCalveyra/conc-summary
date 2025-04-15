@@ -1,9 +1,9 @@
 [package]
 name = "tp4"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [dependencies]
 thread_pool = {path="../thread_pool"}
 grep-lib={path = "../tp_grep/grep-lib"}
-tokio = "1.44.2"
+tokio = {version = "1.44.2", features = ["full"]}

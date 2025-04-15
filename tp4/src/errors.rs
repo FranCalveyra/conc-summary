@@ -1,7 +1,7 @@
 #[derive(Debug)]
-pub enum Error{
+pub enum Error {
     EmptyFile,
     LargeFile,
     Overload,
-    InvalidRoute
+    InvalidRoute,
 }

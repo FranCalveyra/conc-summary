@@ -4,17 +4,18 @@ pub mod errors;
 pub mod search_types;
 pub mod grep;
 
+#[cfg(test)]
 mod tests {
     // TODO: add more tests
-    use crate::file_processor::get_file_reader;
-    use crate::sequence_searcher::find_sequence_in_file;
 
+    use crate::file_processor;
+    use crate::sequence_searcher;
     #[test]
     fn it_works() {
-        let file_reader = get_file_reader("resources/poem.txt".to_string());
+        let file_reader = file_processor::get_file_reader("resources/poem.txt".to_string());
         assert_eq!(true, file_reader.is_ok());
 
-        let lines = find_sequence_in_file(
+        let lines = sequence_searcher::find_sequence_in_file(
             file_reader.unwrap(),
             &"How".to_string(),
         );

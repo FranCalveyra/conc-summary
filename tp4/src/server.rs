@@ -14,31 +14,51 @@ impl Server {
             file_stats: HashMap::new(),
         }
     }
-    pub fn start(&self, thread_amount: usize) {
-        // Should we use tokio?
-        let listener = TcpListener::bind("127.0.0.1:8080").unwrap();
+    pub fn start(&mut self, thread_amount: usize) {
+        let listener = TcpListener::bind("127.0.0.1:3030").unwrap();
 
-        let pool = ThreadPool::new(thread_amount);
+        let pool = ThreadPool::new(thread_amount); // TODO: use tokio
         for stream in listener.incoming() {
             let stream = stream.unwrap();
-            pool.execute(|| handle_connection(stream, &self))
+            pool.execute(move || handle_connection(stream, &mut self))
         }
+    }
+    pub fn get_exceptions(&mut self) -> i64 {
+        self.file_stats.values().map(|&v| v as i64).sum()
     }
 }
 
 pub struct Response {
-    status_code: i32,
-    body: String,
+    pub status_code: i32,
+    pub body: String,
 }
 
 impl Response {
     pub fn new(status_code: i32, body: String) -> Self {
         Response { status_code, body }
     }
+    fn status(&self) -> String {
+        let status_string = match self.status_code {
+            200 => "OK",
+            201 => "Created",
+            429 => "Too Many Requests",
+            400 => "Bad Request",
+            500 => "Internal Server Error",
+            _ => "Unknown Error",
+        };
+        String::from(status_string)
+    }
 }
 
-impl Display for Response{
+impl Display for Response {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-    write!(f, "HTTP")
+        let string = format!(
+            "HTTP/1.1 {} {}\r\nContent-Length: {}\r\nContent-Type: text/plain\r\n\r\n{}",
+            self.status_code,
+            self.status(),
+            self.body.len(),
+            self.body,
+        );
+        write!(f, "{}", string)
     }
 }

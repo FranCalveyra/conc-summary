@@ -12,16 +12,16 @@ Requerimientos:
  */
 
 /*
-   => No persistimos los archivos, matcheamos por nombre y punto
- */
-mod server;
+  => No persistimos los archivos, matcheamos por nombre y punto
+*/
 mod connection_handler;
-mod log_analyzer;
 mod errors;
+mod log_analyzer;
+mod server;
 
 use thread_pool::thread_pool::get_system_thread_amount;
 
 fn main() {
-    let log_server = server::Server::new();
+    let mut log_server = server::Server::new();
     log_server.start(get_system_thread_amount())
 }

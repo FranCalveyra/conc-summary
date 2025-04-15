@@ -1,12 +1,11 @@
-use std::cmp::PartialEq;
-use std::io::{BufRead, BufReader, Write};
-use std::net::TcpStream;
-use std::time::Duration;
 use crate::errors::Error;
 use crate::log_analyzer::{get_stats, process_file};
 use crate::server::{Response, Server};
+use std::cmp::PartialEq;
+use std::io::{BufRead, BufReader, Write};
+use std::net::TcpStream;
 
-pub fn handle_connection(mut stream: TcpStream, server:&Server) {
+pub fn handle_connection(mut stream: TcpStream, server: &mut Server) {
     let buf_reader = BufReader::new(&stream);
 
     let lines = get_request_line(buf_reader);
@@ -16,47 +15,49 @@ pub fn handle_connection(mut stream: TcpStream, server:&Server) {
     let parsed_line = parse_line(line);
 
     if parsed_line.is_err() {
-    //     do something
+        //     do something
+        let err_response = Response::new(400, "".to_string());
+        write_response(&mut stream, err_response);
         return;
     }
 
     let (method, path) = parsed_line.unwrap();
 
+    // May move to the Server struct?
     let response: Response = match (method, path) {
-        (HttpMethod::GET, String::from("/stats")) => get_stats(server),
-        (HttpMethod::POST, String::from("/upload")) => process_file(stream, server),
-        (_,_)=> invalid_route()
+        (HttpMethod::GET, "/stats") => get_stats(server),
+        (HttpMethod::POST, "/upload") => process_file(&mut stream, server),
+        (_, _) => invalid_route(),
     };
 
-
-    // Get the route, redirect depending on method and route
-
-
-
-    // Write Response;
     write_response(&mut stream, response);
 }
 
 fn invalid_route() -> Response {
-    Response::new(200, "".to_string())
+    Response::new(
+        400,
+        "Valid routes: \n\
+        POST /upload - Upload a file for analysis\n\
+        GET /stats - Show statistics"
+            .to_string(),
+    )
 }
 
 #[derive(Eq, PartialEq)]
-enum HttpMethod{
+enum HttpMethod {
     GET,
     POST,
     PUT,
     DELETE,
-
 }
 
-pub fn method_handler (method: &str)-> HttpMethod {
-    match method{
+pub fn method_handler(method: &str) -> HttpMethod {
+    match method {
         "GET" => HttpMethod::GET,
         "POST" => HttpMethod::POST,
         "PUT" => HttpMethod::PUT,
         "DELETE" => HttpMethod::DELETE,
-        _ => HttpMethod::GET //Default => Get
+        _ => HttpMethod::GET, //Default => Get
     }
 }
 
@@ -69,7 +70,7 @@ fn get_request_line(buf_reader: BufReader<&TcpStream>) -> Vec<String> {
     http_request
 }
 
-fn parse_line(request_line: &String) -> Result<(HttpMethod, String), Error> {
+fn parse_line(request_line: &String) -> Result<(HttpMethod, &str), Error> {
     println!("Request Line: {}", request_line);
 
     let parts: Vec<&str> = request_line.split_whitespace().collect();
@@ -80,7 +81,7 @@ fn parse_line(request_line: &String) -> Result<(HttpMethod, String), Error> {
 
         let segments: Vec<&str> = path.trim_matches('/').split('/').collect();
         if segments.len() == 1 {
-            Ok((method, segments[0].parse().unwrap()))
+            Ok((method, segments[0]))
         } else {
             Err(Error::InvalidRoute)
         }
@@ -89,13 +90,6 @@ fn parse_line(request_line: &String) -> Result<(HttpMethod, String), Error> {
     }
 }
 
-
-
 fn write_response(stream: &mut TcpStream, response: Response) {
-    let response = format!(
-        "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nContent-Type: text/plain\r\n\r\n{}",
-        2, // TODO
-        response
-    );
-    &stream.write(response.as_bytes()).unwrap();
+    &stream.write(response.to_string().as_bytes()).unwrap();
 }
