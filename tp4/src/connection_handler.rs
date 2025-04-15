@@ -1,34 +1,19 @@
-use crate::request_handler::{get_request_line, parse_line};
+use crate::http_method::HttpMethod;
+use crate::request::{ContentType, Request};
+use crate::response::Response;
+use crate::server::Server;
+use grep_lib::sequence_searcher::find_sequence_in_file;
 use std::collections::HashMap;
 use std::io::{BufReader, Write};
 use std::net::TcpStream;
 use std::sync::Arc;
-use crate::http_method::HttpMethod;
-use crate::response::Response;
-use crate::server::Server;
 
 pub fn handle_connection(mut stream: TcpStream, server: Arc<Server>) {
-    let buf_reader = BufReader::new(&stream);
+    let request = Request::from_stream(&mut stream);
 
-    let lines = get_request_line(buf_reader);
-
-    let line = &lines[0];
-
-    let parsed_line = parse_line(line);
-
-    if parsed_line.is_err() {
-        //     do something
-        let err_response = Response::new(400, "".to_string());
-        write_response(&mut stream, err_response);
-        return;
-    }
-
-    let (method, path) = parsed_line.unwrap();
-
-    // May move to the Server struct?
-    let response: Response = match (method, path) {
-        (HttpMethod::GET, "/stats") => get_stats(server),
-        (HttpMethod::POST, "/upload") => process_file(&mut stream, server),
+    let response: Response = match (&request.method, request.uri.as_str()) {
+        (HttpMethod::GET, "stats") => get_stats(server),
+        (HttpMethod::POST, "upload") => process_file(request, server),
         (_, _) => invalid_route(),
     };
 
@@ -55,9 +40,32 @@ fn get_stats(server: Arc<Server>) -> Response {
     Response::new(200, body)
 }
 
-fn process_file(stream: &mut TcpStream, server: Arc<Server>) -> Response {
+fn process_file(request: Request, server: Arc<Server>) -> Response {
     // TODO: check border cases (server is full, file not specified)
+    if request.content_type != ContentType::MultipartFormData {
+        return Response::from_status(400);
+    }
+
+    // Should acquire, or explode from acquiring
+    let acquire_result = server.file_semaphore.try_acquire();
+
+    if acquire_result.is_err() { // Server is full
+        return Response::from_status(429);
+    }
+
+    let mut files = server.file_stats.write().unwrap();
+
+    let file = BufReader::new(&request.body);
+    files.insert(
+        get_file_name(request.headers),
+        find_sequence_in_file(*file, &"exception".to_string()),
+    );
+
     Response::new(200, "".to_string())
+}
+
+fn get_file_name(headers: String) -> String {
+    todo!()
 }
 
 fn format_map(map: &HashMap<String, usize>) -> String {
@@ -69,6 +77,7 @@ fn format_map(map: &HashMap<String, usize>) -> String {
         .collect::<Vec<_>>();
 
     formatted.push_str(&entries.join(", "));
+    formatted = (&formatted[..formatted.len() - 2]).to_string(); // removes last comma and space
     formatted.push('}');
 
     formatted

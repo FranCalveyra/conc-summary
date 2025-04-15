@@ -18,7 +18,7 @@ pub mod connection_handler;
 pub mod errors;
 pub mod http_method;
 pub mod log_analyzer;
-pub mod request_handler;
+pub mod request;
 pub mod response;
 pub mod server;
 

@@ -9,8 +9,19 @@ impl Response {
     pub fn new(status_code: i32, body: String) -> Self {
         Response { status_code, body }
     }
+
+    pub fn from_status(status_code: i32) -> Self {
+        Response {
+            status_code,
+            body: Self::_status(status_code),
+        }
+    }
+
     fn status(&self) -> String {
-        let status_string = match self.status_code {
+        Self::_status(self.status_code)
+    }
+    fn _status(status_code: i32) -> String {
+        let status_string = match status_code {
             200 => "OK",
             201 => "Created",
             429 => "Too Many Requests",

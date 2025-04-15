@@ -1,6 +1,8 @@
 use crate::file_processor::get_file_reader;
 use crate::search_types::SearchType;
 use crate::sequence_searcher::{find_sequence_in_file, find_sequence_in_file_per_chunk};
+use std::fs::File;
+use std::io::{BufRead, BufReader};
 use std::thread;
 use std::thread::JoinHandle;
 
@@ -38,9 +40,13 @@ fn sequential_grep(search_term: &String, file_paths: Vec<String>) -> Vec<String>
     file_paths
         .into_iter()
         .map(|path| get_file_reader(path.to_string()).unwrap())
-        .map(|reader| find_sequence_in_file(reader, &search_term))
+        .map(|reader| find_sequence_in_file(&get_vector(reader), &search_term))
         .flatten()
         .collect()
+}
+
+fn get_vector(reader: BufReader<File>) -> Vec<String> {
+    reader.lines().filter_map(|line| line.ok()).collect()
 }
 
 fn concurrent_grep(search_term: &String, file_paths: Vec<String>) -> Vec<String> {
@@ -50,7 +56,10 @@ fn concurrent_grep(search_term: &String, file_paths: Vec<String>) -> Vec<String>
         .map(|path| {
             let value = search_term.clone();
             thread::spawn(move || {
-                find_sequence_in_file(get_file_reader(path.to_string()).unwrap(), &value)
+                find_sequence_in_file(
+                    &get_vector(get_file_reader(path.to_string()).unwrap()),
+                    &value,
+                )
             })
         })
         .for_each(|handle| handles.push(handle));
@@ -69,7 +78,7 @@ fn chunk_concurrent_grep(search_term: &String, file_paths: Vec<String>) -> Vec<S
             let value = search_term.clone();
             thread::spawn(move || {
                 find_sequence_in_file_per_chunk(
-                    get_file_reader(path.to_string()).unwrap(),
+                    &get_vector(get_file_reader(path.to_string()).unwrap()),
                     &value,
                     CHUNK_SIZE,
                 )
