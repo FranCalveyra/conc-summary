@@ -1,10 +1,10 @@
 use crate::http_method::HttpMethod;
+use crate::log_analyzer::analyze_logs;
 use crate::request::{ContentType, Request};
 use crate::response::Response;
 use crate::server::Server;
-use grep_lib::sequence_searcher::find_sequence_in_file;
 use std::collections::HashMap;
-use std::io::{BufReader, Write};
+use std::io::Write;
 use std::net::TcpStream;
 use std::sync::Arc;
 
@@ -49,23 +49,38 @@ fn process_file(request: Request, server: Arc<Server>) -> Response {
     // Should acquire, or explode from acquiring
     let acquire_result = server.file_semaphore.try_acquire();
 
-    if acquire_result.is_err() { // Server is full
+    if acquire_result.is_err() {
+        // Server is full
         return Response::from_status(429);
     }
 
     let mut files = server.file_stats.write().unwrap();
 
-    let file = BufReader::new(&request.body);
+    let file: Vec<String> = request.body.lines().map(|s| s.to_string()).collect();
     files.insert(
-        get_file_name(request.headers),
-        find_sequence_in_file(*file, &"exception".to_string()),
+        get_file_name(&request.headers),
+        analyze_logs("exception".to_string(), &file),
     );
 
     Response::new(200, "".to_string())
 }
 
-fn get_file_name(headers: String) -> String {
-    todo!()
+fn get_file_name(headers: &str) -> String {
+    headers
+        .lines()
+        .find(|line| line.starts_with("Content-Disposition"))
+        .and_then(|line| {
+            line.split(';')
+                .find(|part| part.trim().starts_with("filename="))
+                .map(|filename_part| {
+                    filename_part
+                        .trim()
+                        .trim_start_matches("filename=")
+                        .trim_matches('"')
+                        .to_string()
+                })
+        })
+        .unwrap_or_else(|| "unknown".to_string())
 }
 
 fn format_map(map: &HashMap<String, usize>) -> String {
