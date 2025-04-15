@@ -19,9 +19,10 @@ mod errors;
 mod log_analyzer;
 mod server;
 
+use std::sync::Arc;
 use thread_pool::thread_pool::get_system_thread_amount;
 
 fn main() {
-    let mut log_server = server::Server::new();
+    let mut log_server = Arc::new(server::Server::new());
     log_server.start(get_system_thread_amount())
 }

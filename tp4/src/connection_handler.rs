@@ -4,8 +4,9 @@ use crate::server::{Response, Server};
 use std::cmp::PartialEq;
 use std::io::{BufRead, BufReader, Write};
 use std::net::TcpStream;
+use std::sync::Arc;
 
-pub fn handle_connection(mut stream: TcpStream, server: &mut Server) {
+pub fn handle_connection(mut stream: TcpStream, server: Arc<Server>) {
     let buf_reader = BufReader::new(&stream);
 
     let lines = get_request_line(buf_reader);
@@ -91,5 +92,5 @@ fn parse_line(request_line: &String) -> Result<(HttpMethod, &str), Error> {
 }
 
 fn write_response(stream: &mut TcpStream, response: Response) {
-    &stream.write(response.to_string().as_bytes()).unwrap();
+    let _ = &stream.write(response.to_string().as_bytes()).unwrap();
 }
