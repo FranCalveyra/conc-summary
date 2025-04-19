@@ -32,18 +32,23 @@ fn invalid_route() -> Response {
 
 fn get_stats(server: Arc<Server>) -> Response {
     let exceptions: i64 = server.clone().get_exceptions();
+    let stats = server.file_stats.try_read().unwrap();
+
     let body = format!(
         "Total exceptions: {exceptions}\nFiles processed: {}\nPer file:{}\n",
-        server.file_stats.try_read().unwrap().len(),
-        format_map(&server.file_stats.try_read().unwrap())
+        stats.len(),
+        format_map(&stats)
     );
     Response::new(200, body)
 }
 
 fn process_file(request: Request, server: Arc<Server>) -> Response {
-    // TODO: check border cases (server is full, file not specified)
     if request.content_type != ContentType::MultipartFormData {
         return Response::from_status(400);
+    }
+
+    if request.body.is_empty() {
+        return Response::new(400, "File not found or empty".to_string());
     }
 
     // Should acquire, or explode from acquiring
@@ -56,28 +61,28 @@ fn process_file(request: Request, server: Arc<Server>) -> Response {
 
     let mut files = server.file_stats.write().unwrap();
 
-    let file: Vec<String> = request.body.lines().map(|s| s.to_string()).collect();
     files.insert(
-        get_file_name(&request.headers),
-        analyze_logs("exception".to_string(), &file),
+        get_file_name(&request.body.join("")),
+        analyze_logs("exception".to_string(), &request.body),
     );
 
-    Response::new(200, "".to_string())
+    // Everything went right
+    Response::from_status(200)
 }
 
 fn get_file_name(headers: &str) -> String {
     headers
         .lines()
-        .find(|line| line.starts_with("Content-Disposition"))
+        .find(|line| line.to_lowercase().starts_with("content-disposition"))
         .and_then(|line| {
             line.split(';')
-                .find(|part| part.trim().starts_with("filename="))
-                .map(|filename_part| {
-                    filename_part
-                        .trim()
-                        .trim_start_matches("filename=")
-                        .trim_matches('"')
-                        .to_string()
+                .map(str::trim)
+                .find(|part| part.to_lowercase().starts_with("filename="))
+                .and_then(|part| {
+                    part.splitn(2, '=')
+                        .nth(1)
+                        .map(str::trim)
+                        .map(|val| val.trim_matches('"').to_string())
                 })
         })
         .unwrap_or_else(|| "unknown".to_string())
@@ -92,7 +97,6 @@ fn format_map(map: &HashMap<String, usize>) -> String {
         .collect::<Vec<_>>();
 
     formatted.push_str(&entries.join(", "));
-    formatted = (&formatted[..formatted.len() - 2]).to_string(); // removes last comma and space
     formatted.push('}');
 
     formatted

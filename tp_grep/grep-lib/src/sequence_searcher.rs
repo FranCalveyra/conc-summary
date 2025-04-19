@@ -6,15 +6,7 @@ pub fn find_sequence_in_file(buf_reader: &Vec<String>, pattern: &String) -> Vec<
         .clone()
         .into_iter()
         .map(|line: String| {
-            line.chars()
-                .map(|c| {
-                    if c.is_alphabetic() {
-                        c.to_lowercase().collect::<String>()
-                    } else {
-                        c.to_string()
-                    }
-                })
-                .collect()
+            line.to_lowercase()
         })
         .filter(|cured_line: &String| cured_line.contains(pattern))
         .collect::<Vec<String>>()

@@ -1,13 +1,13 @@
 use crate::errors::Error;
 use crate::http_method::HttpMethod;
-use std::io::{BufRead, BufReader};
+use std::io::{BufRead, BufReader, Read};
 use std::net::TcpStream;
 
 pub struct Request {
     pub uri: String,
     pub parts: usize,
     pub headers: String,
-    pub body: String,
+    pub body: Vec<String>,
     pub method: HttpMethod,
     pub content_type: ContentType,
 }
@@ -15,10 +15,9 @@ pub struct Request {
 impl Request {
     pub fn from_stream(stream: &mut TcpStream) -> Self {
         let buf_reader = BufReader::new(stream);
-        let lines: Vec<String> = get_request_line(buf_reader);
-
-        let (method, uri) = parse_line(&lines[0]).unwrap();
-        let (headers, body) = Self::split_headers_and_body(&lines[1..]);
+        let request: Vec<String> = get_request(buf_reader);
+        let (method, uri) = parse_line(&request[0]).unwrap();
+        let (headers, body) = Self::split_headers_and_body(&request[1..]);
         let content_type = Self::get_content_type(&headers);
 
         Request {
@@ -31,9 +30,9 @@ impl Request {
         }
     }
 
-    fn split_headers_and_body(lines: &[String]) -> (String, String) {
+    fn split_headers_and_body(lines: &[String]) -> (String, Vec<String>) {
         let mut headers = String::new();
-        let mut body = String::new();
+        let mut body_lines = Vec::new();
         let mut is_body = false;
 
         for line in lines {
@@ -43,15 +42,41 @@ impl Request {
             }
 
             if is_body {
-                body.push_str(line);
-                body.push('\n');
+                body_lines.push(line.clone());
             } else {
                 headers.push_str(line);
                 headers.push('\n');
             }
         }
 
-        (headers, body)
+        let boundary = headers
+            .lines()
+            .find(|line| line.starts_with("Content-Type: multipart/form-data; boundary="))
+            .and_then(|line| line.split("boundary=").nth(1))
+            .map(|b| format!("--{}", b.trim()));
+
+        let mut body_parts = Vec::new();
+        if let Some(boundary_marker) = boundary {
+            let mut current_part = Vec::new();
+            for line in body_lines {
+                if line.starts_with(&boundary_marker) {
+                    if !current_part.is_empty() {
+                        body_parts.push(current_part.join("\n"));
+                        current_part = Vec::new();
+                    }
+                    continue;
+                }
+                current_part.push(line);
+            }
+
+            if !current_part.is_empty() {
+                body_parts.push(current_part.join("\n"));
+            }
+        } else {
+            body_parts.push(body_lines.join("\n"));
+        }
+
+        (headers, body_parts)
     }
 
     fn get_content_type(headers: &str) -> ContentType {
@@ -72,18 +97,44 @@ pub enum ContentType {
     Application(String),
 }
 
-fn get_request_line(buf_reader: BufReader<&mut TcpStream>) -> Vec<String> {
-    let http_request: Vec<_> = buf_reader
-        .lines()
-        .map(|result| result.unwrap())
-        .take_while(|line| !line.is_empty())
-        .collect();
-    http_request
+fn get_request(mut buf_reader: BufReader<&mut TcpStream>) -> Vec<String> {
+    let mut request_lines = Vec::new();
+    let mut content_length: Option<usize> = None;
+
+    loop {
+        let mut line = String::new();
+        let bytes_read = buf_reader.read_line(&mut line).unwrap();
+
+        if bytes_read == 0 {
+            break;
+        }
+
+        let trimmed = line.trim_end().to_string();
+
+        if trimmed.is_empty() {
+            request_lines.push(String::new());
+            break;
+        }
+
+        if let Some(cl) = trimmed.strip_prefix("Content-Length:") {
+            content_length = cl.trim().parse::<usize>().ok();
+        }
+
+        request_lines.push(trimmed);
+    }
+
+    if let Some(length) = content_length {
+        let mut body = vec![0u8; length];
+        buf_reader.read_exact(&mut body).unwrap();
+
+        let body_text = String::from_utf8_lossy(&body);
+        request_lines.extend(body_text.lines().map(|s| s.to_string()));
+    }
+
+    request_lines
 }
 
 fn parse_line(request_line: &String) -> Result<(HttpMethod, &str), Error> {
-    println!("Request Line: {}", request_line);
-
     let parts: Vec<&str> = request_line.split_whitespace().collect();
     if parts.len() > 1 {
         let method_string = parts[0];
