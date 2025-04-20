@@ -83,9 +83,12 @@ fn get_file_name(headers: &str) -> String {
                         .nth(1)
                         .map(str::trim)
                         .map(|val| val.trim_matches('"').to_string())
+                        .unwrap_or_else(|| "unknown".to_string())
+                        .split('"')
+                        .nth(0)
                 })
         })
-        .unwrap_or_else(|| "unknown".to_string())
+        .unwrap_or_else(|| "unknown").to_string()
 }
 
 fn format_map(map: &HashMap<String, usize>) -> String {

@@ -61,7 +61,7 @@ impl Request {
             for line in body_lines {
                 if line.starts_with(&boundary_marker) {
                     if !current_part.is_empty() {
-                        body_parts.push(current_part.join("\n"));
+                        body_parts.extend(current_part.iter().cloned());
                         current_part = Vec::new();
                     }
                     continue;
