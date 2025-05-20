@@ -1,26 +1,40 @@
 use crate::queue::Queue;
-use std::ptr::{null, null_mut};
+use std::ptr::null_mut;
 use std::sync::atomic::{AtomicPtr, AtomicUsize, Ordering};
 
 pub struct NonBlockingQueue<T> {
     head: AtomicPtr<Node<T>>,
     tail: AtomicPtr<Node<T>>,
-    size: AtomicUsize,
+    pub size: AtomicUsize,
 }
 
 impl<T> Queue<T> for NonBlockingQueue<T> {
-
-
     // How can I implement the dequeue operation?
     // [1 |]-> [2 |]-> [3 |]-> null
     // Head is 1, tail is 3
-    // If I want to dequeue and remove the one, I must carry a copy of head
-    fn dequeue(&mut self) -> Option<T> {
-        None
+    // If I want to dequeue and remove the one, I must carry a copy of head's data
+    fn dequeue(&self) -> Option<T> {
+        let acquire = Ordering::Acquire;
+        let mut current_head = Box::new(self.head.load(acquire));
+        if self.head.load(acquire).is_null() {
+            return None;
+        }
+        let mut next_node: *mut Node<T>;
+
+        loop {
+            *current_head = self.head.load(acquire);
+            unsafe { next_node = (**current_head).next.load(acquire) }
+            if self
+                .head
+                .compare_exchange(*current_head, next_node, acquire, acquire).is_ok()
+            {
+                self.size.fetch_sub(1, Ordering::Release);
+                unsafe { return (**current_head).item.take() }
+            }
+        }
     }
 
-
-    fn enqueue(&mut self, item: T) {
+    fn enqueue(&self, item: T) {
         // Need to create a mutable pointer to a node
         // As the implementation is concurrent, node data must be in allocated in the heap
         // in order for other processes to complete unfinished operations
@@ -35,14 +49,14 @@ impl<T> Queue<T> for NonBlockingQueue<T> {
                 unsafe {
                     if !tail_next.is_null() {
                         self.tail
-                            .compare_exchange(cur_tail, tail_next, acquire, acquire)
-                            .unwrap();
+                            .compare_exchange(cur_tail, tail_next, acquire, acquire);
                     } else if (*cur_tail).next.compare_exchange(
                         null_mut(), // Refers to a null pointer
                         new_node,
                         acquire,
                         acquire,
-                    ) {
+                    ).is_ok() {
+                        self.size.fetch_add(1, Ordering::Release);
                         self.tail
                             .compare_exchange(cur_tail, new_node, acquire, acquire)
                             .expect("TODO: panic message");
@@ -76,14 +90,14 @@ impl<T> Node<T> {
     pub fn dummy() -> Self {
         Node {
             item: None,
-            next: AtomicPtr::new(std::ptr::null_mut()),
+            next: AtomicPtr::new(null_mut()),
         }
     }
 
     pub fn new(item: T) -> Self {
         Node {
             item: Some(item),
-            next: AtomicPtr::new(std::ptr::null_mut()),
+            next: AtomicPtr::new(null_mut()),
         }
     }
 }
