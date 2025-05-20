@@ -1,7 +1,9 @@
+use non_blocking_queue::NonBlockingQueue;
+
 mod blocking_queue;
 mod non_blocking_queue;
 mod queue;
 
 fn main() {
-    println!("Hello, world!");
+    let q: NonBlockingQueue<i32> = NonBlockingQueue::new();
 }
