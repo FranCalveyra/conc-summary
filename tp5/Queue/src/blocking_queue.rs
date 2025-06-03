@@ -39,3 +39,19 @@ impl<T> BlockingQueue<T> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_blocking_queue() {
+        let queue = BlockingQueue::<i32>::new(10);
+        queue.enqueue(1);
+        queue.enqueue(2);
+        queue.enqueue(3);
+        assert_eq!(queue.dequeue(), Some(1));
+        assert_eq!(queue.dequeue(), Some(2));
+        assert_eq!(queue.dequeue(), Some(3));
+    }
+}

@@ -15,21 +15,24 @@ impl<T> Queue<T> for NonBlockingQueue<T> {
     // If I want to dequeue and remove the one, I must carry a copy of head's data
     fn dequeue(&self) -> Option<T> {
         let acquire = Ordering::Acquire;
-        let mut current_head = Box::new(self.head.load(acquire));
-        if self.head.load(acquire).is_null() {
-            return None;
-        }
-        let mut next_node: *mut Node<T>;
+        let release = Ordering::Release;
 
         loop {
-            *current_head = self.head.load(acquire);
-            unsafe { next_node = (**current_head).next.load(acquire) }
+            let current_head_ptr = self.head.load(acquire);
+
+            if current_head_ptr.is_null() {
+                return None;
+            }
+            let next_node_ptr = unsafe { (*current_head_ptr).next.load(acquire) };
+
             if self
                 .head
-                .compare_exchange(*current_head, next_node, acquire, acquire).is_ok()
+                .compare_exchange(current_head_ptr, next_node_ptr, release, acquire)
+                .is_ok()
             {
                 self.size.fetch_sub(1, Ordering::Release);
-                unsafe { return (**current_head).item.take() }
+                let old_head_node = unsafe { Box::from_raw(current_head_ptr) };
+                return old_head_node.item;
             }
         }
     }
@@ -48,18 +51,23 @@ impl<T> Queue<T> for NonBlockingQueue<T> {
             if cur_tail == self.tail.load(acquire) {
                 unsafe {
                     if !tail_next.is_null() {
-                        self.tail
+                        let _ = self
+                            .tail
                             .compare_exchange(cur_tail, tail_next, acquire, acquire);
-                    } else if (*cur_tail).next.compare_exchange(
-                        null_mut(), // Refers to a null pointer
-                        new_node,
-                        acquire,
-                        acquire,
-                    ).is_ok() {
+                    } else if (*cur_tail)
+                        .next
+                        .compare_exchange(
+                            null_mut(), // Refers to a null pointer
+                            new_node,
+                            acquire,
+                            acquire,
+                        )
+                        .is_ok()
+                    {
                         self.size.fetch_add(1, Ordering::Release);
-                        self.tail
-                            .compare_exchange(cur_tail, new_node, acquire, acquire)
-                            .expect("TODO: panic message");
+                        let _ = self
+                            .tail
+                            .compare_exchange(cur_tail, new_node, acquire, acquire);
                         return;
                     }
                 }
