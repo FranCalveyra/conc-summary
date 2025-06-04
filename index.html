@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Programación Concurrente | Resumen de Programación Concurrente</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Programación Concurrente" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Resumen de Programación Concurrente" />
+<meta property="og:description" content="Resumen de Programación Concurrente" />
+<link rel="canonical" href="/" />
+<meta property="og:url" content="/" />
+<meta property="og:site_name" content="Programación Concurrente" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Programación Concurrente" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","description":"Resumen de Programación Concurrente","headline":"Programación Concurrente","name":"Programación Concurrente","url":"/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="/feed.xml" title="Programación Concurrente" /></head>
+<body><style>
+  /* More specific selectors for the navigation trigger */
+  nav.site-nav > input#nav-trigger ~ div.trigger {
+    display: flex !important; /* Force flex display */
+    overflow-x: auto !important; /* Force horizontal scrolling */
+    white-space: nowrap !important; /* Force no wrapping */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    padding-bottom: 10px; /* Increased padding in case scrollbar is an issue */
+
+    /* Optional: Hide scrollbar for a cleaner look - cross-browser */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  nav.site-nav > input#nav-trigger ~ div.trigger::-webkit-scrollbar {
+    display: none; /* Webkit browsers (Chrome, Safari, Opera) */
+  }
+  nav.site-nav > input#nav-trigger ~ div.trigger > a.page-link {
+    display: inline-block !important; /* Force display */
+    margin-right: 20px !important; /* Force margin */
+    flex-shrink: 0 !important; /* Force no shrinking */
+  }
+  nav.site-nav > input#nav-trigger ~ div.trigger > a.page-link:last-child {
+    margin-right: 0 !important; /* Force no margin for the last tab */
+  }
+</style>
+<header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Programación Concurrente</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+          </div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="home"><h1 id="resumen-de-programación-concurrente">Resumen de Programación Concurrente</h1>
+
+<p>Esta página, creada con Jekyll, recopila las explicaciones y apuntes de los conceptos clave vistos en la materia de Programación Concurrente. A continuación se listan los temas principales. También puedes consultar ejemplos de código en la <a href="https://github.com/FranCalveyra/conc-summary/Práctica">Carpeta de Práctica</a>, donde encontrarás implementaciones y ejercicios resueltos.</p>
+
+<h2 id="temas-vistos">Temas vistos</h2>
+
+<ul>
+  <li>
+    <p><strong>Thread Programming</strong><br />
+Introducción a la creación y manejo de hilos (threads), su ciclo de vida, sincronización básica y comunicación entre hilos.</p>
+  </li>
+  <li>
+    <p><strong>Parallelism</strong><br />
+Estrategias para dividir un problema en subproblemas que puedan ejecutarse en paralelo y aprovechar varios núcleos de CPU.</p>
+  </li>
+  <li>
+    <p><strong>Mutual Exclusion</strong><br />
+Exclusión mutua para evitar condiciones de carrera: secciones críticas y protocolos básicos como test-and-set.</p>
+  </li>
+  <li><strong>Concurrency Abstractions</strong><br />
+Mecanismos de más alto nivel para coordinar hilos:
+    <ul>
+      <li><strong>Locks</strong><br />
+Cerraduras simples para proteger secciones críticas.</li>
+      <li><strong>Reader‐Writer Locks</strong><br />
+Locks que permiten múltiples lectores simultáneos o un único escritor.</li>
+      <li><strong>Semaphores</strong><br />
+Contadores sincronizados que controlan el acceso a recursos compartidos.</li>
+      <li><strong>Condition Variables</strong><br />
+Variables de condición que permiten a un hilo esperar hasta que se cumpla cierta condición, liberando antes el mutex.</li>
+      <li><strong>Monitors</strong><br />
+Abstracción que combina mutex y condition variables en un solo bloque para proteger datos compartidos.</li>
+      <li><strong>Messages</strong><br />
+Comunicación mediante envío y recepción de mensajes entre hilos, evitando acceso directo a variables compartidas.</li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>Mutex Implementation</strong><br />
+Ejemplos de implementación de mutex en bajo nivel usando operaciones atómicas (<code class="language-plaintext highlighter-rouge">test-and-set</code>, <code class="language-plaintext highlighter-rouge">compare-and-swap</code>).</p>
+  </li>
+  <li>
+    <p><strong>Non Blocking Algorithms</strong><br />
+Algoritmos lock-free y wait-free: pilas y colas no bloqueantes, contadores atómicos con backoff y estructuras de datos concurrentes sin mutex.</p>
+  </li>
+  <li><strong>Asynchronicity</strong><br />
+Programación asíncrona con corutinas (en Kotlin):
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">suspend fun</code>, <code class="language-plaintext highlighter-rouge">async/await</code></li>
+      <li><code class="language-plaintext highlighter-rouge">Channel</code> y <code class="language-plaintext highlighter-rouge">Flow</code></li>
+      <li>Timeouts y manejo de errores</li>
+    </ul>
+  </li>
+  <li><strong>Actors (en Scala)</strong><br />
+Modelo de actores usando Akka: cada actor mantiene su propio estado y coordina con otros mediante mensajes, evitando la necesidad de memoria compartida.</li>
+</ul>
+
+<hr />
+
+<h2 id="ejemplos-de-código-en-la-carpeta-de-práctica">Ejemplos de código en la Carpeta de Práctica</h2>
+
+<p>Para ver implementaciones concretas y ejercicios resueltos en cada uno de los temas anteriores, visita la siguiente ruta dentro de este sitio:</p>
+
+<p><a href="https://github.com/FranCalveyra/conc-summary/Práctica">Carpeta de Práctica</a></p>
+
+<p>Allí encontrarás carpetas organizadas por tema con el código fuente y las explicaciones correspondientes.</p>
+<h2 class="post-list-heading">Posts</h2>
+    <ul class="post-list"><li><span class="post-meta">Jun 4, 2025</span>
+        <h3>
+          <a class="post-link" href="/jekyll/update/2025/06/04/welcome-to-jekyll.html">
+            Welcome to Jekyll!
+          </a>
+        </h3></li></ul>
+
+    <p class="rss-subscribe">subscribe <a href="/feed.xml">via RSS</a></p></div>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Programación Concurrente</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Programación Concurrente</li><li><a class="u-email" href="mailto:franciscocalveyra24@gmail.com">franciscocalveyra24@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/FranCalveyra"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">FranCalveyra</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Resumen de Programación Concurrente</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
