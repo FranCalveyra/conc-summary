@@ -4,7 +4,7 @@ layout: home
 
 # Resumen de Programación Concurrente
 
-Esta página, creada con Jekyll, recopila las explicaciones y apuntes de los conceptos clave vistos en la materia de Programación Concurrente. A continuación se listan los temas principales. También puedes consultar ejemplos de código en la [Carpeta de Práctica](https://github.com/FranCalveyra/conc-summary/Práctica), donde encontrarás implementaciones y ejercicios resueltos.
+Esta página, creada con Jekyll, recopila las explicaciones y apuntes de los conceptos clave vistos en la materia de Programación Concurrente. A continuación se listan los temas principales. También puedes consultar ejemplos de código en la [Carpeta de Práctica](https://github.com/FranCalveyra/conc-summary/tree/main/content/Pr%C3%A1ctica), donde encontrarás implementaciones y ejercicios resueltos.
 
 ## Temas vistos
 
@@ -53,6 +53,6 @@ Esta página, creada con Jekyll, recopila las explicaciones y apuntes de los con
 
 Para ver implementaciones concretas y ejercicios resueltos en cada uno de los temas anteriores, visita la siguiente ruta dentro de este sitio:
 
-[Carpeta de Práctica](https://github.com/FranCalveyra/conc-summary/Práctica)
+[Carpeta de Práctica](https://github.com/FranCalveyra/conc-summary/tree/main/content/Pr%C3%A1ctica)
 
 Allí encontrarás carpetas organizadas por tema con el código fuente y las explicaciones correspondientes.
