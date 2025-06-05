@@ -3,6 +3,8 @@ layout: page
 title: Ejercicios para practicar en el 2do Parcial
 ---
 
+[Link al código fuente de esta sección](https://github.com/FranCalveyra/conc-summary/tree/main/content/Pr%C3%A1ctica/Segundo%20Parcial)
+
 En los siguientes ejercicios, se tendrán:
 
 1. La consigna **(qué implementar)**.
@@ -25,7 +27,7 @@ En los siguientes ejercicios, se tendrán:
 
 **Consigna**
 Implementar una función `suspend fun fetchDataFromSources(): List<String>` que simultáneamente lance tres corutinas que
-“simulen” descargar datos de tres fuentes externas diferentes (por ejemplo, retrasos de 1 seg, 2 seg y 3 seg). Cada
+"simulen" descargar datos de tres fuentes externas diferentes (por ejemplo, retrasos de 1 seg, 2 seg y 3 seg). Cada
 descarga retorna una `List<String>` propia. Cuando todas las descargas terminen, hay que combinar sus listas en una sola
 lista ordenada alfabéticamente y retornarla.
 
@@ -44,7 +46,7 @@ lista ordenada alfabéticamente y retornarla.
 
 **Consigna**
 Crear una función `suspend fun getUserProfile(userId: Int): String` que intente obtener el perfil de un usuario desde un
-“servicio remoto simulado” (delay de 5 seg), pero si supera un timeout de 2 seg, se cancele dicha llamada y retorne un
+"servicio remoto simulado" (delay de 5 seg), pero si supera un timeout de 2 seg, se cancele dicha llamada y retorne un
 perfil por defecto (por ejemplo, `"Usuario por defecto"`). Usar `withTimeout` o `withTimeoutOrNull` según convenga.
 
 **Resultados esperados**
@@ -53,7 +55,7 @@ perfil por defecto (por ejemplo, `"Usuario por defecto"`). Usar `withTimeout` o 
   `"Usuario por defecto"`.
 * Si en algún caso se reduce el delay simulado a 1 seg, la función debe devolver el perfil real (por ejemplo
   `"Perfil de 42"`) en ≈ 1 seg.
-* No debe quedar ninguna corutina “colgada” después de que expire el timeout.
+* No debe quedar ninguna corutina "colgada" después de que expire el timeout.
 
 ---
 
@@ -81,7 +83,7 @@ se eligió.
 
 **Consigna**
 Implementar una función `suspend fun processOrders(orderIds: List<Int>): List<String>` que, para cada `orderId`, lance
-una corutina hija (con `async`) que simule “procesar” el pedido (delay aleatorio entre 100 ms y 500 ms) y devuelva
+una corutina hija (con `async`) que simule "procesar" el pedido (delay aleatorio entre 100 ms y 500 ms) y devuelva
 `"Order #<id> processed"`. Si alguno de esos `async` falla (lanza excepción), se debe cancelar toda la ventana de
 procesamiento y propagar un error que incluya el `orderId` que falló. Usar un scope apropiado para que la cancelación se
 propague a todos los hijos.
@@ -99,8 +101,8 @@ propague a todos los hijos.
 ### Ejercicio 1.5: Integración con canal y productor-consumidor
 
 **Consigna**
-Crear un `Channel<Int>` con capacidad 10 que actúe como buffer circular. En una corutina “productor” (`launch`), emite
-números del 1 al 100 con un delay de 50 ms entre cada emisión. En otra corutina “consumidor” (`launch`), recibe de ese
+Crear un `Channel<Int>` con capacidad 10 que actúe como buffer circular. En una corutina "productor" (`launch`), emite
+números del 1 al 100 con un delay de 50 ms entre cada emisión. En otra corutina "consumidor" (`launch`), recibe de ese
 canal y procesa cada número con un delay de 200 ms (simulando trabajo). Finalmente, cuando el productor haya cerrado el
 canal, el consumidor debe terminar y reportar en consola el total de números procesados.
 
@@ -108,7 +110,7 @@ canal, el consumidor debe terminar y reportar en consola el total de números pr
 
 * El productor emite 100 enteros y luego cierra el canal.
 * El consumidor procesa exactamente 100 enteros (impresión en consola de cada uno o simplemente un contador).
-* Debido a que el consumidor tarda 200 ms y el productor solo 50 ms, el canal mantendrá hasta 10 elementos “pendientes”
+* Debido a que el consumidor tarda 200 ms y el productor solo 50 ms, el canal mantendrá hasta 10 elementos "pendientes"
   y luego el productor se suspenderá cuando esté full.
 * Tiempo total aproximado:
 
@@ -173,9 +175,9 @@ impl<T> MpscQueue<T> {
 }
 ```
 
-* Internamente, usar un puntero atómico a un nodo “dummy” como cabeza y otro como cola (Michael & Scott queue
+* Internamente, usar un puntero atómico a un nodo "dummy" como cabeza y otro como cola (Michael & Scott queue
   simplificada).
-* `enqueue` es sólo llamado desde un hilo “productor” y hace `compare_exchange` para insertar al final.
+* `enqueue` es sólo llamado desde un hilo "productor" y hace `compare_exchange` para insertar al final.
 * `dequeue` podrá ser invocado concurrentemente desde N hilos, avanzando la cabeza.
 * Cuidar la operación atómica sobre el tamaño (opcional) con un `AtomicUsize` que incremente en `enqueue` y decremente
   en `dequeue`.
@@ -196,7 +198,7 @@ impl<T> MpscQueue<T> {
 
 **Consigna**
 Implementar un contador (`struct BackoffCounter`) que use un `AtomicUsize` internamente para incrementos concurrentes
-desde N hilos. Para reducir la contención, tras cada “fallo” en el `compare_exchange`, el hilo hará un *backoff*
+desde N hilos. Para reducir la contención, tras cada "fallo" en el `compare_exchange`, el hilo hará un *backoff*
 exponencial: al principio dormir 1 µs, luego 2 µs, 4 µs, hasta un tope (p. ej., 128 µs). La interfaz pública:
 
 ```rust
@@ -215,9 +217,9 @@ impl BackoffCounter {
 
 * Lanzar 16 hilos, cada uno hace 10 000 llamadas a `increment()`.
 * Al unir todos, el valor final de `get()` debe ser 16 × 10 000 = 160 000.
-* Medir (aprox.) el tiempo de ejecución con vs. sin backoff (es suficiente un print de “tiempo sin backoff: X ms”,
-  “tiempo con backoff: Y ms”) para comprobar la mejora de contención cuando hay más hilos.
-* Asegurarse de que nunca se quede “en bucle infinito”, es decir, tras llegar al tope de backoff se vuelve a intentar
+* Medir (aprox.) el tiempo de ejecución con vs. sin backoff (es suficiente un print de "tiempo sin backoff: X ms",
+  "tiempo con backoff: Y ms") para comprobar la mejora de contención cuando hay más hilos.
+* Asegurarse de que nunca se quede "en bucle infinito", es decir, tras llegar al tope de backoff se vuelve a intentar
   indefinidamente, pero con un máximo de 128 µs entre reintentos.
 
 ---
@@ -225,7 +227,7 @@ impl BackoffCounter {
 ### Ejercicio 2.4: Barrera no bloqueante de conteo (Counter Barrier)
 
 **Consigna**
-Construir una “barrera” simplificada donde N hilos llegan (llaman a `arrive_and_wait()`) y sólo cuando todos los N hayan
+Construir una "barrera" simplificada donde N hilos llegan (llaman a `arrive_and_wait()`) y sólo cuando todos los N hayan
 llamado, puedan continuar. Sin usar mutex ni `std::sync::Barrier`. Debe ser lock-free:
 
 ```rust
@@ -242,9 +244,9 @@ impl CountBarrier {
 ```
 
 * Cada hilo que llegue hace `counter.fetch_add(1, SeqCst)`. Si el resultado tras el fetch\_add es `< target - 1`,
-  entonces “espera” activamente (pero sin busy-wait puro). La última hebra que incrementa `counter` a `target` pone
+  entonces "espera" activamente (pero sin busy-wait puro). La última hebra que incrementa `counter` a `target` pone
   `release_flag = true`.
-* Las hebras que aun no son la última “spin-wait” con un `std::thread::yield_now()` y chequean periódicamente
+* Las hebras que aun no son la última "spin-wait" con un `std::thread::yield_now()` y chequean periódicamente
   `release_flag`.
 * Una vez `release_flag` es `true`, todos los hilos salen de la barrera. El primero en salir reinicializa el `counter` a
   0 y `release_flag` a `false` (para permitir reuso), usando CAS.
@@ -253,10 +255,10 @@ impl CountBarrier {
 
 * Crear un test con N = 10 hilos. Cada hilo en loop de 5 iteraciones hace:
 
-    1. “Trabajo” simulado (sleep 10 ms).
+    1. "Trabajo" simulado (sleep 10 ms).
     2. Llama a `arrive_and_wait()`.
-    3. En un `println!` indica “<thread> barrera pasada ronda k”.
-* Esperar a que todos impriman “barrera pasada ronda 0” antes de que cualquiera continúe a la ronda 1, y así
+    3. En un `println!` indica "<thread> barrera pasada ronda k".
+* Esperar a que todos impriman "barrera pasada ronda 0" antes de que cualquiera continúe a la ronda 1, y así
   sucesivamente hasta 4.
 * Al final las 5 rondas se completan sin deadlock ni carreras.
 
@@ -268,13 +270,13 @@ impl CountBarrier {
 Diseñar una tabla hash concurrente muy simplificada (`struct LockFreeHashMap<K, V>`) que soporte `insert(key, value)`,
 `get(&key) -> Option<V>`, y `remove(&key) -> Option<V>`. Debe basarse en:
 
-1. Un vector fijo de “celdas” tamaño M (e.g. M=64), donde cada celda es un puntero atómico a una lista enlazada
+1. Un vector fijo de "celdas" tamaño M (e.g. M=64), donde cada celda es un puntero atómico a una lista enlazada
    lock-free de pares `(K, V)`.
-2. Cada lista se implementa como un stack “lock-free” con `AtomicPtr<Node>`, similar al Ejercicio 2.1.
+2. Cada lista se implementa como un stack "lock-free" con `AtomicPtr<Node>`, similar al Ejercicio 2.1.
 3. Para `insert`, se calcula `hash = hash(key) % M`, luego se hace push de `(K,V)` en la lista correspondiente. Si ya
    existe el key, se puede decidir: a) rechazar, o b) insertar duplicado.
-4. Para `get`, se lee la lista en modo “snapshot”: se recorre sin bloquear la lista.
-5. Para `remove`, se marca el nodo “lógicamente eliminado” (opcional) o bien se hace “lazy deletion” dejando que otro
+4. Para `get`, se lee la lista en modo "snapshot": se recorre sin bloquear la lista.
+5. Para `remove`, se marca el nodo "lógicamente eliminado" (opcional) o bien se hace "lazy deletion" dejando que otro
    thread lo retire al inspeccionar la lista.
 
 La parte complicada es coordinar las listas lock-free sin mutex:
@@ -291,7 +293,7 @@ La parte complicada es coordinar las listas lock-free sin mutex:
     * `remove(random_key)`
 * Al terminar, imprimir cuántas claves únicas quedaron en la tabla.
 * Verificar, tras el test, que todos los nodos removidos fueron liberados (usar `cargo miri` para chequear leaks).
-* Comprobar también que nunca se obtiene un valor “corrupto” para ninguna clave (p.ej. comparar con un mapa secuencial
+* Comprobar también que nunca se obtiene un valor "corrupto" para ninguna clave (p.ej. comparar con un mapa secuencial
   simulado como oracle).
 
 ---
@@ -302,7 +304,7 @@ La parte complicada es coordinar las listas lock-free sin mutex:
 
 * Usar Scala 2.13+ y la librería Akka (versión 2.6 o superior).
 * Definir actores extendiendo `akka.actor.Actor` o usando `AbstractBehavior` (Akka Typed), según prefieras.
-* Cada ejercicio debe incluir la descripción de los mensajes (“case class” o “case object”) y la lógica interna de los
+* Cada ejercicio debe incluir la descripción de los mensajes ("case class" o "case object") y la lógica interna de los
   actores (stateful o stateless).
 * Los tests esperados deben formularse de manera genérica: enviar mensajes y verificar estados finales o respuestas.
 
@@ -350,7 +352,7 @@ Implementar un sistema de chat muy simple:
 Construir dos actores:
 
 1. **WorkerActor**: cada vez que reciba un mensaje `DoWork(n: Int)`, si `n < 0` lanza un
-   `RuntimeException("n negativo")`; en otro caso, “procesa” imprimendo `Trabajando con n` y devuelve `Done(n*2)` al
+   `RuntimeException("n negativo")`; en otro caso, "procesa" imprimendo `Trabajando con n` y devuelve `Done(n*2)` al
    remitente.
 2. **SupervisorActor**: al iniciarse, crea un hijo `WorkerActor` y envía mensajes `DoWork` al hijo. Debe usar un
    `OneForOneStrategy` que, si el hijo falla por `RuntimeException`, lo reinicie automáticamente.
@@ -413,14 +415,14 @@ hora actual o incremente un contador interno.
 
     * `StartTick(interval: FiniteDuration)` — arranca un ticker interno que cada `interval` envía al propio actor
       `Tick`.
-    * `Tick` (interno) — al recibirlo, incrementa un contador `count` y emite a todos los “suscriptores” (otros actores
+    * `Tick` (interno) — al recibirlo, incrementa un contador `count` y emite a todos los "suscriptores" (otros actores
       en una lista) un mensaje `Ticked(count)`.
     * `Subscribe(subscriberRef: ActorRef)` — agrega `subscriberRef` a la lista de suscriptores.
     * `GetCount(replyTo: ActorRef)` — responde con el valor actual de `count`.
 
 **Resultados esperados (tests de alto nivel)**
 
-* Crear `TickerActor`, luego dos actores “listener” que se suscriben (`Subscribe`) antes de arrancar.
+* Crear `TickerActor`, luego dos actores "listener" que se suscriben (`Subscribe`) antes de arrancar.
 * Enviar `StartTick(200.millis)` a `TickerActor`.
 * Esperar 1 seg en el test. Los listeners deben recibir aproximadamente 5 mensajes `Ticked(1)`, `Ticked(2)`, … hasta
   `Ticked(5)`.
@@ -434,7 +436,7 @@ hora actual o incremente un contador interno.
 
 **Consigna**
 Simular un actor que mantiene un contador persistente en memoria (sin usar Akka Persistence); grabar periódicamente su
-estado a disco como “snapshot” (por ejemplo, serializando a un archivo local). A grandes rasgos:
+estado a disco como "snapshot" (por ejemplo, serializando a un archivo local). A grandes rasgos:
 
 * **PersistentCounterActor**:
 
@@ -453,8 +455,8 @@ estado a disco como “snapshot” (por ejemplo, serializando a un archivo local
 * Inicializar sin fichero de snapshot. Enviar 5×`Increment`. Luego `GetValue(testProbe)`: debe responder `Value(5)`. No
   hay snapshot todavía.
 * Enviar 5× más `Increment` (total 10) → automáticamente el actor hace `Snapshot` (genera `/tmp/counter.snapshot` con
-  “10”).
-* Parar (detener) el actor, reiniciarlo y verificar que en `Recover` lea “10” → `count` arranca en 10.
+  "10").
+* Parar (detener) el actor, reiniciarlo y verificar que en `Recover` lea "10" → `count` arranca en 10.
 * Enviar 3×`Increment` y al hacer `GetValue`, debe dar `Value(13)`.
 * Borrar manualmente el archivo, reiniciar actor → en `Recover` no encuentra snapshot, arranca en `0`.
 

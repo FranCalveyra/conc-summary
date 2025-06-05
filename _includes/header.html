@@ -48,7 +48,7 @@
             {%- if my_page.title -%}
               {% comment %} Exclude any pages that have 'nav_order' (Clase pages) or are part of 'content/Práctica/' {% endcomment %}
               {%- unless my_page.nav_order or my_page.path contains 'content/Práctica/' -%}
-                <a class="page-link" href="{{ my_page.url | relative_url }}">{{ my_page.title | escape }}</a>
+            <a class="page-link" href="{{ my_page.url | relative_url }}">{{ my_page.title | escape }}</a>
               {%- endunless -%}
             {%- endif -%}
           {%- endfor -%}
