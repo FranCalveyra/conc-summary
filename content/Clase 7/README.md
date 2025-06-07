@@ -86,12 +86,22 @@ Es más de bajo nivel, justamente porque Rust permite hacer controles a bajo niv
 Cada tipo de ordering tiene diferentes garantías a nivel CPU.
 Refiere a cómo se ordenan las instrucciones a nivel procesador.
 
+`Ordering` es un enum que especifica las garantías de visibilidad y orden de las operaciones atómicas entre hilos. En el contexto de algoritmos no bloqueantes, elegir el nivel de Ordering adecuado es clave para asegurar corrección (sin data races) y optimizar rendimiento (minimizando barreras de memoria).
+
+Los órdenes son los siguientes:
+
 - Sequentially Consistent (`SeqCst`): más restrictivo, pero es el más lento. Debe funcionar para TODOS LOS CASOS.
-    - Java lo usa por defecto.
+    - Todas las operaciones atómicas con `SeqCst` aparecen en un único orden global, simplificando el razonamiento a costa de mayor coste en barreras de memoria.
+    - `Java` lo usa por defecto.
     - No se puede reordenar las operaciones de lectura y escritura.
+- `AcqRel`: combinación de Acquire y Release
+  - Combina Acquire y Release en una operación de lectura-modificación-escritura (por ejemplo, fetch_add), ideal para estructuras de lock-free donde una sola operación hace ambas cosas. 
+- `Acquire`: más restrictivo que `Release`, pero menos que `AcqRel`
+  - Asegura que ninguna lectura/escritura posterior al “load” pueda reordenarse antes de él. Se sincroniza con un `Release` correspondiente para “ver” los efectos previos al `store`.
 - `Release`: más restrictivo que `Relaxed`, pero menos que `Acquire`
-- `Acquire`: más restrictivo que `Release`, pero menos que `SeqCst`
+  - Garantiza que ninguna lectura/escritura previa al “store” pueda reordenarse después de él. Permite publicar cambios en memoria antes de que otro hilo los observe con un `Acquire`.
 - `Relaxed`: menos restrictivo
+  - Solo garantiza la atomicidad de la operación: no impone ningún orden relativo con otras lecturas o escrituras. Útil cuando solo importa el valor atómico, no la sincronización con otros datos.
 
 ##### Operaciones típicas
 
@@ -240,7 +250,7 @@ No es detectable por operaciones concurrentes, lo cual puede llevar a asunciones
 ## Pros y Contras de los Algoritmos No Bloqueantes
 
 | Aspecto                | Pros                                           | Contras                                                   |
-|------------------------|------------------------------------------------|-----------------------------------------------------------|
+| ---------------------- | ---------------------------------------------- | --------------------------------------------------------- |
 | Rendimiento            | Alto en baja contención.                       | Puede degradarse en alta contención.                      |
 | Escalabilidad          | Mejorada debido a la ausencia de bloqueos.     | Limitada por la contención y el costo de reintentos.      |
 | Interbloqueo           | Evitado por completo.                          | Pueden ocurrir livelocks.                                 |

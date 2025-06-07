@@ -8,14 +8,13 @@ Esta clase todo lo que hace es mostrar implementaciones concurrentes de resolver
 
 Después de eso se espera que el thread termine y se junten los resultados.
 ## Ejemplo
-Si queremos calcular $2*k*a*t*e^{-a * t}$, podemos:
-- Primero calcular $2*k*a*t$
-- Después calcular $e^{-a * t}$
+Si queremos calcular $$2*k*a*t*e^{-a * t}$$, podemos:
+- Primero calcular $$ 2*k*a*t $$
+- Después calcular $ e^{-a * t} $
 - Finalmente, multiplicar los resultados de los dos pasos anteriores.
 
 ### Implementación secuencial
 ```rust
-
 fn evaluate_sequential(k: f64, a: f64, t: f64) -> f64 {
 
     let a = 2.0 * k * a * t;

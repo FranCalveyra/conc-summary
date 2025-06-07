@@ -36,16 +36,16 @@ Esta página, creada con Jekyll, recopila las explicaciones y apuntes de los con
   Ejemplos de implementación de mutex en bajo nivel usando operaciones atómicas (`test-and-set`, `compare-and-swap`).
 
 - **Non Blocking Algorithms**  
-  Algoritmos lock-free y wait-free: pilas y colas no bloqueantes, contadores atómicos con backoff y estructuras de datos concurrentes sin mutex.
+  Algoritmos lock-free y wait-free: pilas y colas no bloqueantes, contadores atómicos y estructuras de datos concurrentes sin mutex.
 
 - **Asynchronicity**  
   Programación asíncrona con corutinas (en Kotlin):  
   - `suspend fun`, `async/await`  
-  - `Channel` y `Flow`  
+  - `Futures`  
   - Timeouts y manejo de errores
 
 - **Actors (en Scala)**  
-  Modelo de actores usando Akka: cada actor mantiene su propio estado y coordina con otros mediante mensajes, evitando la necesidad de memoria compartida.
+  Modelo de actores usando `Akka`: cada actor mantiene su propio estado y coordina con otros mediante mensajes, evitando la necesidad de memoria compartida.
 
 ---
 

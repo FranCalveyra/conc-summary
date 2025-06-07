@@ -5,11 +5,52 @@ nav_order: 4
 ---
 # Exclusión Mutua
 
-### La raíz del problema
+## La raíz del problema
 - No determinismo causado por hilos concurrentes accediendo a un estado mutable compartido.
 - Ayuda encapsular el estado en actores o transacciones, pero el problema fundamental sigue siendo el mismo.
 
-### No determinismo = procesamiento paralelo + estado mutable.
+### Ejemplo en Java
+```java
+public class Counter {
+    int value = 0;
+
+    void increment() {
+        int localCounter = value;
+        System.out.println(threadName() + " reads counter as: " + localCounter);
+
+        localCounter = localCounter + 1;
+        
+        value = localCounter;
+        System.out.println(threadName() + " updated counter to: " + value);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        var counter = new Counter();
+
+        // Two threads trying to increment the counter simultaneously
+        Thread t1 = new Thread(counter::increment, "Thread 1");
+        Thread t2 = new Thread(counter::increment, "Thread 2");
+
+        startAll(t1, t2);
+        joinAll(t1, t2);
+
+        System.out.println("Expected value: 2, actual value: " + counter.value);
+    }
+}
+``` 
+
+#### Output:
+```
+Thread 1 reads counter as: 0
+Thread 2 reads counter as: 0
+Thread 1 updated counter to: 1
+Thread 2 updated counter to: 1
+Expected value: 2, actual value: 1
+```
+
+## No determinismo = procesamiento paralelo + estado mutable.
 - Para obtener un procesamiento determinista, ¡evita el estado mutable!
 - Evitar el estado mutable significa programar funcionalmente.
 
@@ -21,6 +62,8 @@ Pero el comportamiento sustantivo del sistema no está garantizado.
 Llevando a resultados erráticos e impredecibles.
 
 Es un poco obvio a este punto; si quieren un ejemplo vean el slide, con lo del contador en Java que lo pueden mutar.
+
+![Condición de Carrera](race-condition.png)
 
 ### Solución: Forzar Acceso Único
 Si forzamos una regla de que solo un proceso puede entrar al método incrementar a la vez entonces:
@@ -37,6 +80,22 @@ Nótese que el keyword `synchronized` en Java es un ejemplo básico de un lock (
 - Si se hace sobre un método estático, el lock es sobre la clase.
   - Esto último lo busqué.
 
+```java
+public class Counter {
+    int value = 0;
+
+    synchronized void increment() {
+        int localCounter = value;
+        System.out.println(threadName() + " reads counter as: " + localCounter);
+
+        localCounter = localCounter + 1;
+        
+        value = localCounter;
+        System.out.println(threadName() + " updated counter to: " + value);
+    }
+}
+```
+
 # Memoria compartida entre hilos
 En el ejemplo del slide en el que es virtualmente imposible que falle, la falla se da\
 porque el thread que falló leyó memoria vieja (que ya no existe) respecto a una de las 2 variables, y actualizó la otra.
@@ -46,7 +105,7 @@ Es difícil compartir la memoria entre threads debido a estas cuestiones, por lo
 En Java, se usa el keyword `volatile`.
 
 Esto fuerza a la JVM a sincronizar la variable hacia y desde la memoria compartida\
-Volatile es ligero y más rápido que el bloqueo
+Volatile es ligero y más rápido que el bloqueo.
 
 Ahora, otro de los problemas principales de la memoria compartida es que los procesos van a \
 competir por recursos.
