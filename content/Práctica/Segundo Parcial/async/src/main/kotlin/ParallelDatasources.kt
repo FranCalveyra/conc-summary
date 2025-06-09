@@ -9,7 +9,7 @@ fun main() {
     val time = measureTimeMillis {
         println(fetchDataFromSources())
     }
-    println("Total time: $time")
+    println("Total time: $time") // Es aproximadamente 3 segundos
 }
 
 fun fetchDataFromSources(): List<String> = runBlocking {
