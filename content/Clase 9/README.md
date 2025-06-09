@@ -202,7 +202,7 @@ fun main() = runBlocking {
 }
 ```
 
-Clavarle el `async` fuerza que se te vaya una de las 2 corutinas a otro thread
+Clavarle el `async` fuerza que se te vaya una de las 2 corutinas a otro thread ya que, justamente, crea una corutina.
 
 Es "paralelo" porque los procesos se hacen en paralelo, pero termina siendo una ejecución secuencial del main porque
 tenés que esperar los resultados (dados los `.await()`)
@@ -210,7 +210,7 @@ tenés que esperar los resultados (dados los `.await()`)
 ## Threads vs. Fibers vs. Corutinas
 
 | Concepto                                     | Estado                                                  | Ejecutado por                   | Unidad de suspensión                                                                    |
-|----------------------------------------------|---------------------------------------------------------|---------------------------------|-----------------------------------------------------------------------------------------|
+| -------------------------------------------- | ------------------------------------------------------- | ------------------------------- | --------------------------------------------------------------------------------------- |
 | **Hilo (Thread a nivel S.O)**                | Stack de modo usuario + Stack de modo kernel + contexto | Scheduler del sistema operativo | Hilo completo; la CPU queda libre para ejecutar otros hilos                             |
 | **Fiber (User-Mode-Thread, Virtual Thread)** | Stack de modo usuario + contexto                        | Algún hilo                      | Fiber; el hilo subyacente queda libre para ejecutar otras tareas                        |
 | **Corutina**                                 | Variables locales + contexto                            | Algún hilo o fiber              | Corutina; el hilo o fiber subyacente queda libre para ejecutar otras corutinas o tareas |
