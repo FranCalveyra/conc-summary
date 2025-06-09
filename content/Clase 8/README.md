@@ -147,7 +147,6 @@ Se intenta pasar de esto:
 fun program(a: A): B {}
 // CSP
 fun program(a: A, k: (B) -> Unit) {}
-
 ```
 
 A esto:
@@ -168,7 +167,6 @@ A esto:
 
 ```kotlin
 fun program(a: A): ((B) -> Unit) -> Unit {}
-
 ```
 
 Usando Currying (como en Haskell)

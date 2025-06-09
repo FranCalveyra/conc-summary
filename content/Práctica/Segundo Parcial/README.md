@@ -16,6 +16,9 @@ title: Segundo Parcial
 - Non-Blocking también (en Rust)
 - En ninguno de los 2 se va a hilar muy fino, con que conceptualmente esté bien, todo pelota
 
+> Nota: es más difícil escribir el `main` que modelar las clases de los actores. Pídanselo a GPT para ver cómo se hace, es súper específica la sintaxis.
+> Tiene mucho Syntax Sugar
+
 ## Ejercicios
 
 - [Ejercicios del Segundo Parcial](Exercises.html)

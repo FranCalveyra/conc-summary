@@ -204,8 +204,6 @@ fun main() = runBlocking {
 
 Clavarle el `async` fuerza que se te vaya una de las 2 corutinas a otro thread
 
-CORREGIDO: lo anterior es mentira según el chat
-
 Es "paralelo" porque los procesos se hacen en paralelo, pero termina siendo una ejecución secuencial del main porque
 tenés que esperar los resultados (dados los `.await()`)
 

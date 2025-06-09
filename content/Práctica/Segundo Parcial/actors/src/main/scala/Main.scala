@@ -26,7 +26,7 @@ object Main extends App {
   //  // Como es un Future[Any], se puede iterar para procesar los resultados de manera asíncrona
   //  future.foreach(result => printer ! result)
 
-  counter ! ("get", printer)
+  counter.tell("get", printer)
 
   // Optionally, shut down the actor system after a delay
   system.scheduler.scheduleOnce(5 seconds) {

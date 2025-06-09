@@ -1,7 +1,7 @@
 package org.edu.austral
 package counter
 
-import akka.actor.{Actor, ActorRef}
+import akka.actor.Actor
 
 class Counter extends Actor {
 
@@ -9,7 +9,7 @@ class Counter extends Actor {
 
   private def counter(n: BigInt): Receive = {
     case "incr" => context.become(counter(n + 1))
-    case ("get", sender: ActorRef) => sender ! n
+    case "get" => sender() ! n
   }
 }
 
