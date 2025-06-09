@@ -1,4 +1,4 @@
-use std::collections::VecDeque;
+// use std::collections::VecDeque;
 use std::ptr::null_mut;
 use std::sync::atomic::{AtomicPtr, AtomicUsize, Ordering};
 use std::sync::{Condvar, Mutex};
@@ -13,13 +13,13 @@ trait Stack<T> {
 const ACQ: Ordering = Ordering::Acquire;
 const REL: Ordering = Ordering::Release;
 
-struct BlockingStack<T> {
-    elements: Mutex<VecDeque<T>>,
-    not_empty: Condvar,
-    not_full: Condvar,
-    size: AtomicUsize,
-    capacity: usize,
-}
+// struct BlockingStack<T> {
+//     elements: Mutex<VecDeque<T>>,
+//     not_empty: Condvar,
+//     not_full: Condvar,
+//     size: AtomicUsize,
+//     capacity: usize,
+// }
 
 // impl<T> BlockingStack<T> {
 //     pub fn new(capacity: usize) -> Self {

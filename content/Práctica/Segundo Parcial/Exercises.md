@@ -135,13 +135,13 @@ canal, el consumidor debe terminar y reportar en consola el total de números pr
 ### Ejercicio 2.1: Pila no bloqueante (Lock-free Stack)
 
 **Consigna**
-Implementar una pila (`struct LockFreeStack<T>`) con los siguientes métodos:
+Implementar una pila (`struct NonBlockingStack<T>`) con los siguientes métodos:
 
 ```rust
-impl<T> LockFreeStack<T> {
+impl<T> NonBlockingStack<T> {
     pub fn new() -> Self { /* … */ }
-    pub fn push(&self, value: T);
-    pub fn pop(&self) -> Option<T>;
+    pub fn push(&self, value: T){}
+    pub fn pop(&self) -> Option<T>{/*...*/}
 }
 ```
 
@@ -224,47 +224,7 @@ impl BackoffCounter {
 
 ---
 
-### Ejercicio 2.4: Barrera no bloqueante de conteo (Counter Barrier)
-
-**Consigna**
-Construir una "barrera" simplificada donde N hilos llegan (llaman a `arrive_and_wait()`) y sólo cuando todos los N hayan
-llamado, puedan continuar. Sin usar mutex ni `std::sync::Barrier`. Debe ser lock-free:
-
-```rust
-struct CountBarrier {
-    target: usize,
-    counter: AtomicUsize,
-    release_flag: AtomicBool,
-}
-
-impl CountBarrier {
-    pub fn new(n: usize) -> Self { /* … */ }
-    pub fn arrive_and_wait(&self);
-}
-```
-
-* Cada hilo que llegue hace `counter.fetch_add(1, SeqCst)`. Si el resultado tras el fetch\_add es `< target - 1`,
-  entonces "espera" activamente (pero sin busy-wait puro). La última hebra que incrementa `counter` a `target` pone
-  `release_flag = true`.
-* Las hebras que aun no son la última "spin-wait" con un `std::thread::yield_now()` y chequean periódicamente
-  `release_flag`.
-* Una vez `release_flag` es `true`, todos los hilos salen de la barrera. El primero en salir reinicializa el `counter` a
-  0 y `release_flag` a `false` (para permitir reuso), usando CAS.
-
-**Resultados esperados**
-
-* Crear un test con N = 10 hilos. Cada hilo en loop de 5 iteraciones hace:
-
-    1. "Trabajo" simulado (sleep 10 ms).
-    2. Llama a `arrive_and_wait()`.
-    3. En un `println!` indica "<thread> barrera pasada ronda k".
-* Esperar a que todos impriman "barrera pasada ronda 0" antes de que cualquiera continúe a la ronda 1, y así
-  sucesivamente hasta 4.
-* Al final las 5 rondas se completan sin deadlock ni carreras.
-
----
-
-### Ejercicio 2.5: Tabla hash concurrente lock-free (Lock-free HashMap)
+### Ejercicio 2.4: Tabla hash concurrente lock-free (Lock-free HashMap)
 
 **Consigna**
 Diseñar una tabla hash concurrente muy simplificada (`struct LockFreeHashMap<K, V>`) que soporte `insert(key, value)`,
