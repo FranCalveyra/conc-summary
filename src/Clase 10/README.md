@@ -44,7 +44,7 @@ Es OOP + Mensajes, en definitiva. Forzado dentro de un sistema donde todo tiene 
 
 ```scala
 // Se define un type alias llamado 'Receive'
-/* Representa una funcon que maneja los mensajes que se le envían a un Actor
+/* Representa una función que maneja los mensajes que se le envían a un Actor
 - Es una PartialFunction, lo que significa que puede no manejar cualquier posible input
 - Toma un mensaje de cualquier tipo, y no devuelve nada ('Unit')
  */

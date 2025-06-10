@@ -17,8 +17,8 @@ Con este tipo de algoritmos vamos a tratar de resolver los problemas de los algo
 
 ### Rol
 
-- Operaciones atómicas: permiten operaciones atómicas
-    - Las operaciones atómicas se hacen en un único paso no divisible. No puedo tener el problema del lock porque no lo
+- Operaciones atómicas
+    - Se hacen en un único paso no divisible. No puedo tener el problema del lock porque no lo
       puedo "partir al medio".
 - Integridad de los datos: asegura integridad sin usar locks
 - Utilidad:

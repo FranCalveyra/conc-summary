@@ -253,5 +253,5 @@ blendedCoffee =
         coffee2 <- makeCoffeeFuture
         return coffee1 ++ " Blended With " ++ coffee2 
 ```
-- Esto es exactamente igual al `Future<T>.thenCombine(Future<T>)`
+- Esto es exactamente igual al `Future<T>.thenAccept(Future<T>)`
 

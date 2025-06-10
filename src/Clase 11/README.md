@@ -115,7 +115,7 @@ class WireTransfer extends Actor {
 
 - Si no se piden explícitamente, las garantías de entrega son más bajas
 - _"Todo se puede ir al diablo en cualquier momento"_ a.k.a. _"Let it crash"_
-- La idea es que pienses que como que todo puede fallar, te asegures de que dejás el sistema en un estado consistente
+- La idea es que pienses que, como todo **puede fallar**, te asegures de que dejás el sistema en un estado consistente
 - La entrega del mensaje requiere disponibilidad eventual del canal y del receptor
 
 ### Garantías
