@@ -91,15 +91,25 @@ Refiere a cómo se ordenan las instrucciones a nivel procesador.
 Los órdenes son los siguientes:
 
 - Sequentially Consistent (`SeqCst`): más restrictivo, pero es el más lento. Debe funcionar para TODOS LOS CASOS.
-    - Todas las operaciones atómicas con `SeqCst` aparecen en un único orden global, simplificando el razonamiento a costa de mayor coste en barreras de memoria.
+    - Todas las operaciones atómicas con `SeqCst` aparecen en un único orden global, simplificando el razonamiento, pero teniendo como trade-off un mayor costo en barreras de memoria.
+      - Tiene que poner barreras de memoria, justamente para asegurar la consistencia.
+    - Si se declara un acceso como `SeqCst`, ese acceso se queda anclado ahí.
+    - No se pueden reordenar las operaciones de lectura y escritura.
     - `Java` lo usa por defecto.
-    - No se puede reordenar las operaciones de lectura y escritura.
 - `AcqRel`: combinación de Acquire y Release
   - Combina Acquire y Release en una operación de lectura-modificación-escritura (por ejemplo, fetch_add), ideal para estructuras de lock-free donde una sola operación hace ambas cosas. 
 - `Acquire`: más restrictivo que `Release`, pero menos que `AcqRel`
   - Asegura que ninguna lectura/escritura posterior al “load” pueda reordenarse antes de él. Se sincroniza con un `Release` correspondiente para “ver” los efectos previos al `store`.
+  - Como se usa en conjunto con `Release`, lo que se busca (o al menos su caso de uso inicialmente intencionado) es "adquirir y liberar locks".
+    - Lo que intentan ambos orderings es que las secciones críticas del programa no se solapen.
+  - Todos los accesos posteriores a un `Acquire` se van a ejecutar después de este.
+  - No hay ninguna garantía de que se las operaciones anteriores no se reordenen para ejecutarse después.
+  - El caso de uso de estos 2 en conjunto es bastante simple:
+    - Adquiero el "lock" al comenzar una sección crítica con `Acquire` y cuando termino lo libero usando `Release` (normalmente usando la operación atómica `store`).
 - `Release`: más restrictivo que `Relaxed`, pero menos que `Acquire`
   - Garantiza que ninguna lectura/escritura previa al “store” pueda reordenarse después de él. Permite publicar cambios en memoria antes de que otro hilo los observe con un `Acquire`.
+  - Todos los accesos anteriores a un `Release` se van a ejecutar antes de este.
+  - No hay ninguna garantía de que se las operaciones posteriores no se reordenen para ejecutarse antes.
 - `Relaxed`: menos restrictivo
   - Solo garantiza la atomicidad de la operación: no impone ningún orden relativo con otras lecturas o escrituras. Útil cuando solo importa el valor atómico, no la sincronización con otros datos.
 
