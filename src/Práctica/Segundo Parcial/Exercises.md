@@ -1,7 +1,7 @@
 
 # Ejercicios para practicar para el 2do parcial
 
-[Link al código fuente de esta sección](https://github.com/FranCalveyra/conc-summary/tree/main/content/Pr%C3%A1ctica/Segundo%20Parcial)
+[Link al código fuente de esta sección](https://github.com/FranCalveyra/conc-summary/tree/main/src/Pr%C3%A1ctica/Segundo%20Parcial)
 
 En los siguientes ejercicios, se tendrán:
 

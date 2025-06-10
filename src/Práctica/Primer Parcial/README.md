@@ -3,4 +3,4 @@ Esta práctica incluye los ejercicios que vimos en clase. Hace falta agregar un 
 
 [Ejercicios](Exercises.md)
 
-[Link al código fuente de esta sección](https://github.com/FranCalveyra/conc-summary/tree/main/content/Pr%C3%A1ctica/Primer%20Parcial)
+[Link al código fuente de esta sección](https://github.com/FranCalveyra/conc-summary/tree/main/src/Pr%C3%A1ctica/Primer%20Parcial)

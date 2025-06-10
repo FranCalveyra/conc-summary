@@ -7,4 +7,4 @@ Aquí encontrarás los ejercicios y material de práctica.
 - [Primer Parcial](Primer%20Parcial/README.md)
 - [Segundo Parcial](Segundo%20Parcial/README.md)
 
-[Link al código fuente](https://github.com/FranCalveyra/conc-summary/tree/main/content/Pr%C3%A1ctica)
+[Link al código fuente](https://github.com/FranCalveyra/conc-summary/tree/main/src/Pr%C3%A1ctica)

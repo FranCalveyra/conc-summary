@@ -1,5 +1,5 @@
 # Ejercicios para practicar para el 1er parcial
-[Link al código fuente de esta sección](https://github.com/FranCalveyra/conc-summary/tree/main/content/Pr%C3%A1ctica/Primer%20Parcial/practice/src)
+[Link al código fuente de esta sección](https://github.com/FranCalveyra/conc-summary/tree/main/src/Pr%C3%A1ctica/Primer%20Parcial/practice/src)
 
 En los siguientes ejercicios, se explorarán diversos aspectos de la programación concurrente utilizando Rust.
 
