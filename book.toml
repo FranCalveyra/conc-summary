@@ -1,5 +1,11 @@
 [book]
-authors = ["FranCalveyra"]
-language = "es"
+authors = []
+language = "en"
+multilingual = false
 src = "src"
-title = "Resumen Programación Concurrente"
+title = "Resumen Programacion Concurrente"
+
+[preprocessor.katex]
+after = ["links"]
+
+[output.html]
