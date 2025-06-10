@@ -1,0 +1,5 @@
+[book]
+authors = ["FranCalveyra"]
+language = "es"
+src = "src"
+title = "Resumen Programación Concurrente"
