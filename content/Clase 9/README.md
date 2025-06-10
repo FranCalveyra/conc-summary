@@ -48,9 +48,9 @@ async function coffeeBreak(): Promise<void> {
 
 ### JavaScript es Single-Threaded
 
-- Originado en el browser: javascript fue diseñado para manipular el DOM en navegadores web.
+- **Originado en el browser**: `javascript` fue diseñado para manipular el DOM en navegadores web.
 - El modelo single-threaded previene conflictos e inconsistencias.
-- Event Loop: javascript opera sobre un modelo basado en eventos. El bucle de eventos verifica tareas como entradas de
+- **Event Loop**: `javascript` opera sobre un modelo basado en eventos. El bucle de eventos verifica tareas como entradas de
   usuario, solicitudes de red y temporizadores.
 - Asegura la capacidad de respuesta procesando un evento a la vez.
 - Como no puedo levantar threads en el Browser, en JS se tiene que pensar la programación de manera asíncrona
@@ -78,7 +78,9 @@ suspend fun makeCoffee(): String {
 }
 
 fun coffeeBreakWithCoroutines() = runBlocking {
-    // Las corutinas sólo pueden invocarse dentro del scope de un launch
+    // Los launch sólo pueden invocarse dentro de una corutina
+    // `runBlocking` dispara una corutina "bloqueante", 
+    // que bloquea el thread en el que se ejecuta hasta que termine la operación
     launch {
         val coffee = makeCoffee()
         drink(coffee)

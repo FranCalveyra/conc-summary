@@ -6,9 +6,12 @@ title: Segundo Parcial
 ## Temas a evaluar
 
 [//]: # (TODO: insertar los links a cada carpeta)
-- [Non-Blocking en Rust]() 
-- [Asincronismo en Kotlin]()
+- [Non-Blocking en Rust](https://github.com/FranCalveyra/conc-summary/tree/main/content/Pr%C3%A1ctica/Segundo%20Parcial/non-blocking) 
+- [Asincronismo en Kotlin](https://github.com/FranCalveyra/conc-summary/tree/main/content/Pr%C3%A1ctica/Segundo%20Parcial/async)
 - [Actores en Scala con Akka](https://github.com/FranCalveyra/conc-summary/tree/main/content/Pr%C3%A1ctica/Segundo%20Parcial/actors)
+- Consignas del Segundo Parcial 2024
+  - ![Segundo Parcial](./assets/segundo_parcial.png)
+  - [Resolución](resolucion_2do_parcial_2024.html)
 
 ## Notas
 - Actores puede entrar de manera práctica

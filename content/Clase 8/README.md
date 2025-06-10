@@ -3,11 +3,9 @@ layout: page
 title: Clase 8
 nav_order: 8
 ---
-# Programación asíncrona
+# Programación Asíncrona
 
 ### Ejemplo: pedir un café
-
-#### De manera síncrona
 
 **Aclaración**: Cada cajero tiene una máquina de café
 
@@ -15,6 +13,8 @@ nav_order: 8
 - El cajero hace el café
 - El cajero le da el café al cliente 1
 - Luego viene el cliente 2 y repite la secuencia
+
+#### De manera síncrona
 
 ##### Consideraciones
 
@@ -162,12 +162,14 @@ Esencialmente, pasamos de esto:
 ```kotlin
 fun program(a: A, k: (B) -> Unit) : Unit {}
 ```
+- Tomamos un callback como parámetro y lo ejecutamos
 
 A esto:
 
 ```kotlin
 fun program(a: A): ((B) -> Unit) -> Unit {}
 ```
+- Devolvemos una función que toma una función que devuelve un `Unit`, que termina devolviendo un `Unit`
 
 Usando Currying (como en Haskell)
 
@@ -175,9 +177,11 @@ Usando Currying (como en Haskell)
 add :: Num a => a -> a -> a
 add x y = x + y
 
--- The type of `add 10` will be
+-- El tipo de `add 10` va a ser:
 add 10 :: Num a => a -> a
 ```
+- En Haskell yo me puedo guardar una función en una variable con un parámetro con un valor "por default", e invocarla en otro lado.
+- Justamente eso es Currying.
 
 ### Ejemplo del Café usando `Future`
 
@@ -214,6 +218,20 @@ fun futureCoffeeBreak() {
 }
 ```
 
+### Manejar errores con Futures
+```kotlin
+fun futureCoffeeBreak() {
+    val f: CompletableFuture<String> = makeCoffeeFuture()
+    f.thenAccept { coffee ->
+        drink(coffee)
+    }
+    .handle { r, exception ->
+        println("Failed with $exception")
+    } 
+    chatWithColleagues()
+}
+```
+
 ### Combinando Futures
 
 ```kotlin
@@ -230,9 +248,8 @@ fun futureCoffeeBreakBlended() {
 }
 ```
 
-### En definitiva, los Futures son Monads
-Cabe recordar que un Monad en Haskell es una interfaz para
-distintas estructuras de control.
+### En definitiva, los `Futures` son `Monads`
+Cabe recordar que un `Monad` en `Haskell` es una interfaz para poder definir operaciones de cómputo en términos de valores y secuencias de cómputo usando valores tipados.
 
 ```haskell
 blendedCoffee = 
@@ -241,5 +258,5 @@ blendedCoffee =
         coffee2 <- makeCoffeeFuture
         return coffee1 ++ " Blended With " ++ coffee2 
 ```
-
+- Esto es exactamente igual al `Future<T>.thenCombine(Future<T>)`
 

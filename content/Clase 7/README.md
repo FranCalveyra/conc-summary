@@ -49,7 +49,7 @@ public class AtomicCounter {
 
 ### Operaciones típicas sobre variables atómicas:
 
-- `get()`, `set(int newValue)`, `getAndSet()`
+- `get()`, `set(int newValue)`, `getAndSet(int newValue)`
 - `compareAndSet(int expect, int update)`: compara el valor actual con el esperado y si son iguales lo cambia al nuevo
   valor.
 - `getAndIncrement()`, `getAndDecrement()`, `getAndAdd(int delta)`
@@ -165,7 +165,6 @@ class Stack<E> {
 ![A typical Queue implementation using a linked list](queue.png)
 
 ```kotlin
-
 class Queue<E> {
     class Node<E>(val item: E?, var next: Node<E>? = null)
 
@@ -232,9 +231,9 @@ No es detectable por operaciones concurrentes, lo cual puede llevar a asunciones
 
 ### ¿Por qué es un problema?
 
-- Operations like compare-and-swap (CAS) can be tricked into thinking no change occurred.
-- Potentially causing incorrect program behavior.
-- For example. If I pop an item from a stack and modify it if still is the same
+- Las operaciones como `compare-and-swap` (CAS) pueden ser "engañadas" para que piensen que no ocurrió ningún tipo de cambio
+- Esto potencialmente puede causar un comportamiento incorrecto del programa
+- Por ejemplo, si poppeo un item de un stack y lo vuelvo a pushear
 
 ### Soluciones posibles
 
@@ -244,7 +243,7 @@ No es detectable por operaciones concurrentes, lo cual puede llevar a asunciones
 - En Java se puede usar `AtomicStampedReference`, que es una referencia atómica que incluye un "timestamp" o versión.
     - `ref.compareAndSet(currentValue, newValue, currentStamp, newStamp);`
 - En Rust no puede existir este problema. ¿Por qué?
-    - Por el borrow checker y por la inexistencia del Garbage Collector. No puedo tener una pasa del GC en el medio de
+    - Por el borrow checker y por la inexistencia del Garbage Collector. No puedo tener una pasada del GC en el medio de
       la operación.
 
 ## Pros y Contras de los Algoritmos No Bloqueantes
