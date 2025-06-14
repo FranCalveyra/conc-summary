@@ -4,6 +4,7 @@ mod input_output_task;
 
 use std::env;
 use std::process;
+use std::time::Instant;
 use crate::simulation::{AsyncSimulation, Simulation, SimulationType, ThreadSimulation};
 
 fn print_usage(program: &str) {
@@ -32,8 +33,16 @@ fn get_arg(args: &[String], key: &str, prog: &str) -> String {
     print_usage(prog);
     process::exit(1);
 }
+
 #[tokio::main]
-async fn main() {
+async fn main(){
+    let before_exec = Instant::now();
+    operate().await;
+    let current = before_exec.elapsed();
+    println!("Elapsed time: `{}`", current.as_millis())
+}
+
+async fn operate() {
     let args: Vec<String> = env::args().collect();
     let prog = &args[0];
     let async_simulation = AsyncSimulation{};
