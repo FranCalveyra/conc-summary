@@ -26,7 +26,9 @@ jobs:
         run: npm install -g @marp-team/marp-cli
 
       - name: Render slides to HTML
-        run: marp docs/presentation/presentation.md --html -o build
+        run: |
+          mkdir -p build
+          marp docs/presentation/presentation.md --html -o build/index.html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
