@@ -1,12 +1,53 @@
 ---
 marp: true
+theme: gaia
+paginate: true
+style: |
+  /* mdBook Coal dark theme */
+  section {
+    background-color: #282c34;
+    color: #abb2bf;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 1.8rem;
+  }
+  section::before {
+    background: none;
+  }
+  h1 {
+    color: #61afef;
+    font-size: 2rem;
+  }
+  h2 {
+    color: #61afef;
+    font-size: 1.75rem;
+  }
+  h3 {
+    color: #61afef;
+    font-size: 1.5rem;
+  }
+  h4 {
+    color: #61afef;
+    font-size: 1.25rem;
+  }
+  h5 {
+    color: #61afef;
+    font-size: 1rem;
+  }
+  pre {
+    background-color: #21252b;
+    border: 1px solid #3e4451;
+    border-radius: 3px;
+    padding: 1em;
+    max-height: 70vh;
+    overflow: auto;
+  }
+  code {
+    background-color: #21252b;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    color: #abb2bf;
+  }
 ---
-<style>
-pre {
-  max-height: 70vh;
-  overflow: auto;
-}
-</style>
 
 # Programación Concurrente
 
