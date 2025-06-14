@@ -56,12 +56,7 @@ impl<T> Queue<T> for NonBlockingQueue<T> {
                             .compare_exchange(cur_tail, tail_next, acquire, acquire);
                     } else if (*cur_tail)
                         .next
-                        .compare_exchange(
-                            null_mut(), // Refers to a null pointer
-                            new_node,
-                            acquire,
-                            acquire,
-                        )
+                        .compare_exchange(null_mut(), new_node, acquire, acquire)
                         .is_ok()
                     {
                         self.size.fetch_add(1, Ordering::Release);

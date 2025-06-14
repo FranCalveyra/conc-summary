@@ -14,19 +14,11 @@ pub trait Grep {
 
 impl Grep for SearchType {
     fn find_sequence_in_file(&self, pattern: &String, file_paths: Vec<String>) -> Vec<String> {
-        let mut lines: Vec<String> = Vec::new();
         match self {
-            SearchType::Sequential => {
-                lines = sequential_grep(&pattern, file_paths);
-            }
-            SearchType::Concurrent => {
-                lines = concurrent_grep(&pattern, file_paths);
-            }
-            SearchType::ChunkConcurrent => {
-                lines = chunk_concurrent_grep(&pattern, file_paths);
-            }
+            SearchType::Sequential => sequential_grep(&pattern, file_paths),
+            SearchType::Concurrent => concurrent_grep(&pattern, file_paths),
+            SearchType::ChunkConcurrent => chunk_concurrent_grep(&pattern, file_paths),
         }
-        lines
     }
 }
 
