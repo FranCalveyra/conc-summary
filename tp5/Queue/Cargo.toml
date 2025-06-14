@@ -1,7 +1,6 @@
 [package]
-name = "grep-app"
+name = "Queue"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-grep-lib={path = "../grep-lib"}

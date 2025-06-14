@@ -8,8 +8,7 @@ pub enum Error{
 impl Display for Error{
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            Error::FileReadingError=> write!(f, "Error reading file"),
-            _ => write!(f, "Generic Error")
+            Error::FileReadingError=> write!(f, "Error reading file")
         }
     }
 }

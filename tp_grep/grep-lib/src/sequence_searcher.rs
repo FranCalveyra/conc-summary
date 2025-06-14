@@ -1,29 +1,22 @@
-use std::fs::File;
-use std::io::{BufRead, BufReader};
 use std::ops::Div;
 use std::thread;
 
-pub fn find_sequence_in_file(
-    buf_reader: BufReader<File>,
-    pattern: &String,
-) -> Vec<String> {
-
+pub fn find_sequence_in_file(buf_reader: &Vec<String>, pattern: &String) -> Vec<String> {
     buf_reader
-        .lines()
-        .map(|line_result| line_result.unwrap())
-        .filter(|line| line.contains(pattern))
+        .clone()
+        .into_iter()
+        .map(|line: String| {
+            line.to_lowercase()
+        })
+        .filter(|cured_line: &String| cured_line.contains(pattern))
         .collect::<Vec<String>>()
-
 }
 
 pub fn find_sequence_in_file_per_chunk(
-    buf_reader: BufReader<File>,
+    lines: &Vec<String>,
     pattern: &String,
-    chunk_size: i32
+    chunk_size: i32,
 ) -> Vec<String> {
-
-    let lines: Vec<String> = buf_reader.lines().map(|line| line.unwrap()).collect();
-
     let chunks: i32 = (lines.len() as i32).div(chunk_size);
 
     let mut threads = vec![];
