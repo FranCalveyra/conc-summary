@@ -1,6 +1,13 @@
 ---
 marp: true
 ---
+<style>
+pre {
+  max-height: 70vh;
+  overflow: auto;
+}
+</style>
+
 # Programación Concurrente
 
 ### Docentes:
@@ -71,12 +78,67 @@ for stream in listener.incoming() {
 }
 ```
 ___
+# Thread Pool
+```rust
+pub struct ThreadPool {
+    workers: Vec<Worker>,
+    sender: Sender<Job>,
+}
+
+impl ThreadPool {
+    pub fn new(size: usize) -> ThreadPool {
+        assert!(size > 0);
+        let (sender, receiver) = channel();
+        let receiver = Arc::new(Mutex::new(receiver));
+        let mut workers = Vec::with_capacity(size);
+        
+        for id in 0..size {
+            workers.push(Worker::new(id, Arc::clone(&receiver)));
+        }
+        ThreadPool { workers, sender }
+    }
+
+    pub fn execute<F>(&self, f: F)
+    where
+        F: FnOnce() + Send + 'static,
+    {
+        let job = Box::new(f);
+        self.sender.send(job).unwrap();
+    }
+}
+```
+___
+## Workers
+```rust
+type JobFunctionType = dyn FnOnce() + Send + 'static;
+type Job = Box<JobFunctionType>;
+struct Worker {
+    id: usize,
+    thread: JoinHandle<()>,
+}
+
+impl Worker {
+    fn new(id: usize, receiver: Arc<Mutex<Receiver<Job>>>) -> Self {
+        let thread = thread::spawn(move || {
+            loop {
+                let job = receiver.lock().unwrap().recv().unwrap();
+                println!("Worker {id} got a job; executing.");
+                job();
+            }
+        });
+
+        Worker { id, thread }
+    }
+}
+```
+___
 
 # Trabajo Práctico N°4
 ## Servidor de análisis de logs con control de concurrencia
 ### Problema planteado:
 - Permitir la subida de archivos de logs, calcular estadísticas de excepciones y limitar a 4 procesamientos simultáneos
-### Solución:
+---
+# Solución
 ```rust
 pub struct Server {
     pub file_stats: RwLock<HashMap<String, usize>>,
@@ -93,6 +155,59 @@ impl Server {
             pool.execute(move || handle_connection(stream, server_ref));
         }
     }
+    pub fn get_exceptions(self: Arc<Self>) -> i64 {
+        self.file_stats
+            .try_read()
+            .unwrap()
+            .values()
+            .map(|&v| v as i64)
+            .sum()
+    }
+}
+```
+___
+# Get Stats
+```rust
+fn get_stats(server: Arc<Server>) -> Response {
+    let exceptions: i64 = server.clone().get_exceptions();
+    let stats = server.file_stats.try_read().unwrap();
+
+    let body = format!(
+        "Total exceptions: {exceptions}\nFiles processed: {}\nPer file:{}\n",
+        stats.len(),
+        format_map(&stats)
+    );
+    Response::new(200, body)
+}
+```
+___
+# Process Exceptions
+```rust
+fn process_file(request: Request, server: Arc<Server>) -> Response {
+    if request.content_type != ContentType::MultipartFormData {
+        return Response::from_status(400);
+    }
+
+    if request.body.is_empty() {
+        return Response::new(400, "File not found or empty".to_string());
+    }
+
+    let acquire_result = server.file_semaphore.try_acquire();
+
+    if acquire_result.is_err() {
+        // Server is full
+        return Response::from_status(429);
+    }
+
+    let mut files = server.file_stats.write().unwrap();
+
+    files.insert(
+        get_file_name(&request.body.join("")),
+        analyze_logs("exception".to_string(), &request.body),
+    );
+
+    // Everything went right
+    Response::from_status(200)
 }
 ```
 ___
@@ -176,7 +291,8 @@ fn dequeue(&self) -> Option<T> {
 ## Herramienta tipo grep
 ### Problema planteado:
 - Desarrollar un clon de 'grep' con modos secuencial, concurrente y por chunks
-### Solución:
+___
+# Solución
 ```rust
 const CHUNK_SIZE: i32 = 20000; // Line amount
 
@@ -192,12 +308,6 @@ impl Grep for SearchType {
             SearchType::ChunkConcurrent => chunk_concurrent_grep(&pattern, file_paths),
         }
     }
-}
-
-pub fn grep(search_type: SearchType, search_term: String, file_paths: Vec<String>) {
-    let lines = search_type.find_sequence_in_file(&search_term, file_paths);
-
-    lines.iter().for_each(|line| println!("{}", line))
 }
 ```
 ___
@@ -241,6 +351,20 @@ fn concurrent_grep(search_term: &String, file_paths: Vec<String>) -> Vec<String>
 }
 ```
 ---
+# Find sequence in file - Seq & Conc
+```rust
+pub fn find_sequence_in_file(buf_reader: &Vec<String>, pattern: &String) -> Vec<String> {
+    buf_reader
+        .clone()
+        .into_iter()
+        .map(|line: String| {
+            line.to_lowercase()
+        })
+        .filter(|cured_line: &String| cured_line.contains(pattern))
+        .collect::<Vec<String>>()
+}
+```
+___
 # C-Chunk
 ```rust
 fn chunk_concurrent_grep(search_term: &String, file_paths: Vec<String>) -> Vec<String> {
@@ -263,5 +387,38 @@ fn chunk_concurrent_grep(search_term: &String, file_paths: Vec<String>) -> Vec<S
         .map(|handle| handle.join().unwrap())
         .flatten()
         .collect()
+}
+```
+___
+# Find sequence in file - C-Chunk
+```rust
+pub fn find_sequence_in_file_per_chunk(
+    lines: &Vec<String>,
+    pattern: &String,
+    chunk_size: i32,
+) -> Vec<String> {
+    let chunks: i32 = (lines.len() as i32).div(chunk_size);
+
+    let mut threads = vec![];
+
+    for chunk in 0..chunks {
+        let pattern_copy = pattern.clone();
+        let lines_copy = lines.clone();
+        let handle = thread::spawn(move || {
+            lines_copy[(chunk_size * chunk) as usize..(chunk_size * (chunk + 1)) as usize]
+                .iter()
+                .filter(|line| line.contains(&pattern_copy))
+                .cloned()
+                .collect::<Vec<String>>()
+        });
+        threads.push(handle);
+    }
+
+    let mut result = vec![];
+    for thread in threads {
+        result.extend(thread.join().unwrap());
+    }
+
+    result
 }
 ```
