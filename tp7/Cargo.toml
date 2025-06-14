@@ -1,0 +1,8 @@
+[package]
+name = "tp7"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.45.1", features = ["rt", "rt-multi-thread", "macros", "time"] }
+tokio-macros = { version = "0.2.0-alpha.6" }
