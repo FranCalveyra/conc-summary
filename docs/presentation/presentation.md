@@ -89,6 +89,16 @@ fn term(i: i32) -> f64 {
 ```
 ___
 
+# Preguntas abiertas
+1. ¿Qué sucede con dos requests simultáneas que tardan en procesarse?
+2. ¿Por qué se observa este comportamiento?
+3. ¿Cómo solucionar usando solo librerías estándar de Rust?
+# Conclusiones
+1. Una se encola después de la otra.
+2. Es un servidor single-threaded.
+3. Como veremos en el TP N°2, levantando un `thread` por cada request, usando `thread::spawn`
+___
+
 # Trabajo Práctico N°2
 ## Servidor Concurrente - Un hilo por conexión
 ### Problema planteado:
@@ -106,6 +116,17 @@ fn start_server() {
 ```
 ___
 
+# Preguntas abiertas
+- Bajo carga concurrente intensa (aumentando -n y -c en ab), ¿qué
+efectos se observan en el comportamiento del servidor? ¿Se nota alguna
+diferencia en los tiempos de respuesta, la latencia o el comportamiento
+general? ¿A qué se debe?
+# Conclusiones
+Siendo N el número de requests y C la cantidad de usuarios concurrentes, lo que notamos en cuanto a las diferencias de rendimiento es que, bajo una carga muy alta de concurrencia, el servidor se empieza a ralentizar, llegando a una performance similar a la versión `single-threaded` del TP N°1. Es decir, **empeora**.
+
+Esto se debe al overhead que suponen los cambios de contexto entre threads, ya que se crea un thread por cada request que llega.
+___
+
 # Trabajo Práctico N°3
 ## Thread Pool
 ### Problema planteado:
@@ -121,11 +142,7 @@ for stream in listener.incoming() {
 ___
 # Thread Pool
 ```rust
-pub struct ThreadPool {
-    workers: Vec<Worker>,
-    sender: Sender<Job>,
-}
-
+pub struct ThreadPool { workers: Vec<Worker>, sender: Sender<Job> }
 impl ThreadPool {
     pub fn new(size: usize) -> ThreadPool {
         assert!(size > 0);
@@ -137,14 +154,9 @@ impl ThreadPool {
             workers.push(Worker::new(id, Arc::clone(&receiver)));
         }
         ThreadPool { workers, sender }
-    }
-
-    pub fn execute<F>(&self, f: F)
-    where
-        F: FnOnce() + Send + 'static,
-    {
-        let job = Box::new(f);
-        self.sender.send(job).unwrap();
+    } 
+    pub fn execute<F>(&self, f: F) where F: FnOnce() + Send + 'static, {
+        self.sender.send(Box::new(f)).unwrap();
     }
 }
 ```
@@ -174,6 +186,14 @@ impl Worker {
 ```
 ___
 
+# Preguntas TP3
+1. Bajo carga concurrente intensa (aumentando -n y -c en ab), ¿qué efectos se observan en el comportamiento del servidor? ¿Cómo se comparan con los resultados obtenidos en el TP2?
+2. ¿Cómo se ve afectado el comportamiento ante carga concurrente intensa para diferentes tamaños de thread pool ?
+# Conclusiones TP3
+1. Es significativamente más performante que el servidor desarrollado en el TP2, dado que no existe el problema de los cambios de contexto por tener `Workers`, o hilos que se mantienen vivos.
+2. En caso de que el Thread Pool tenga pocos threads a su disposición, su rendimiento se verá reducido dado que podrá procesar menos requests simultáneas.
+___
+
 # Trabajo Práctico N°4
 ## Servidor de análisis de logs con control de concurrencia
 ### Problema planteado:
@@ -181,11 +201,7 @@ ___
 ---
 # Solución
 ```rust
-pub struct Server {
-    pub file_stats: RwLock<HashMap<String, usize>>,
-    pub file_semaphore: Semaphore,
-}
-
+pub struct Server { pub file_stats: RwLock<HashMap<String, usize>>, pub file_semaphore: Semaphore }
 impl Server {
     pub fn start(self: Arc<Self>, thread_amount: usize) {
         let listener = TcpListener::bind("127.0.0.1:3030").unwrap();
@@ -197,12 +213,7 @@ impl Server {
         }
     }
     pub fn get_exceptions(self: Arc<Self>) -> i64 {
-        self.file_stats
-            .try_read()
-            .unwrap()
-            .values()
-            .map(|&v| v as i64)
-            .sum()
+        self.file_stats.try_read().unwrap().values().map(|&v| v as i64).sum()
     }
 }
 ```
@@ -252,6 +263,15 @@ fn process_file(request: Request, server: Arc<Server>) -> Response {
 }
 ```
 ___
+> Si bien no había una sección de preguntas en este TP, nos gustaría hacer un par de observaciones.
+# Observaciones TP4
+- El uso del `RwLock` sobre el `HashMap` de estadísticas es **imperativo**; debe haber obligatoriamente una forma de controlar las escrituras y lecturas sobre dichos datos para evitar condiciones de carrera.
+- Consideramos que el semáforo (de `tokio`) es una manera simple de controlar la cantidad de usuarios simultáneos, dado que sólo necesitamos una primitivas:
+  - `Semaphore.try_acquire() -> Result<SemaphorePermit<'_>, TryAcquireError>`:
+    - Esta primitiva devuelve un `Result` que determina si se pudo adquirir el semáforo (si se pudo adquirir uno de los recursos limitados que "protege")
+      - En caso positivo, se obtiene el "permiso" del semáforo
+      - En caso negativo, se obtiene un **error** sin más
+___
 
 # Trabajo Práctico N°5
 ## Cola No Bloqueante
@@ -271,26 +291,24 @@ ___
 ```rust
 fn enqueue(&self, item: T) {
         let new_node = Box::into_raw(Box::new(Node::new(item)));
-
         let acquire = Ordering::Acquire;
+        let release = Ordering::Release;
         loop {
             let cur_tail = self.tail.load(acquire);
             let tail_next = unsafe { (*cur_tail).next.load(acquire) };
             if cur_tail == self.tail.load(acquire) {
                 unsafe {
                     if !tail_next.is_null() {
-                        let _ = self
-                            .tail
-                            .compare_exchange(cur_tail, tail_next, acquire, acquire);
+                        self.tail.compare_exchange(cur_tail, tail_next, acquire, release);
                     } else if (*cur_tail)
                         .next
-                        .compare_exchange(null_mut(), new_node, acquire, acquire)
+                        .compare_exchange(null_mut(), new_node, acquire, release)
                         .is_ok()
                     {
                         self.size.fetch_add(1, Ordering::Release);
                         let _ = self
                             .tail
-                            .compare_exchange(cur_tail, new_node, acquire, acquire);
+                            .compare_exchange(cur_tail, new_node, acquire, release);
                         return;
                     }
                 }
@@ -326,6 +344,24 @@ fn dequeue(&self) -> Option<T> {
     }
 ```
 
+---
+
+# Preguntas TP5
+1. ¿Qué diferencias observás en el rendimiento entre la versión bloqueante y la no bloqueante?
+2. ¿Qué dificultades técnicas encontraste al implementar la versión no bloqueante?
+3. ¿Bajo qué escenarios conviene usar cada una?
+4. ¿Qué pasaría si se mezclan productores bloqueantes con consumidores no bloqueantes (o viceversa)?
+---
+# Conclusiones TP5
+1. Bajo concurrencia baja, la versión bloqueante es más performante, mientras que bajo alta concurrencia gana la versión no bloqueante.
+2. Principalmente:
+   - Lidiar con el `ownership` de Rust
+   - Saber cómo y dónde aplicar las operaciones `unsafe`
+   - Entender el funcionamiento del `Ordering`
+3. Precisamente, conviene usar cada una en los escenarios donde gana cada una (los previamente mencionados):
+   - Si se va a tener una concurrencia relativamente baja, o pocas operaciones de acceso a memoria compartida, se usa la versión bloqueante
+   - En caso contrario, se usa la versión bloqueante
+4. Puede incurrir en un deadlock, livelock o memoria no liberada (por nodos sin referenciar).
 ---
 
 # TP Grep
@@ -463,3 +499,10 @@ pub fn find_sequence_in_file_per_chunk(
     result
 }
 ```
+___
+# Preguntas TP Grep
+1. ¿Cómo se comparan los tiempos de ejecución entre la implementación secuencial y la concurrente?
+2. Al reducir el tamaño de los segmentos (chunks), ¿qué patrón se observa en los tiempos de ejecución? ¿A qué se debe esto?
+# Conclusiones TP Grep
+1. En principio, la ejecución concurrente es más rápida, dado que se paraleliza el procesamiento de archivos.
+2. Si el tamaño del chunk se vuelve muy pequeño (respecto al tamaño del archivo), la implementación `C-Chunk` se vuelve casi igual o menos performante que la concurrente. Esto se debe al problema de los cambios de contexto. El overhead que supone crear un thread para procesar una parte muy pequeña de un archivo y luego unirlo a la ejecución principal es lo suficientemente alto como para empeorar el rendimiento al punto de que no valga la pena operar por **chunks**.
