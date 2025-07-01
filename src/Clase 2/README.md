@@ -32,8 +32,7 @@ private static void helloLambda() {
 }
 ```
 
-> Cabe destacar que lo anterior simplemente levanta los threads, que se ejecutarán como el procesador los quiera
-> ejecutar.
+> Cabe destacar que lo anterior simplemente levanta los threads, que se ejecutarán como el procesador los quiera ejecutar.
 
 ### Administrar manualmente la ejecución
 
@@ -51,9 +50,8 @@ private static void hello() throws InterruptedException {
 El método `join` espera a que el thread termine su ejecución.\
 Si no se llama a `join`, el thread principal puede terminar antes que los threads secundarios.
 
-> Denle importancia al `throws InterruptedException`. La firma de esta función es así porque, al querer unir los threads
-> al principal (o esperar a que terminen), puede haber una interrupción.
->
+> Denle importancia al `throws InterruptedException`. La firma de esta función es así porque, al querer unir los threads al principal (o esperar a que terminen), puede haber una interrupción.
+
 > Al llamar a este método, se habilita a que cualquier thread interrumpa el actual (donde se está ejecutando esta
 > función) por la razón que sea.
 
@@ -98,7 +96,7 @@ fn hello() {
 
 ### Lifetime
 
-Sabiendo que Rust sabe que los threads no escapan del scope: \
+Sabiendo que Rust sabe que los threads no escapan del scope:
 
 - Las reglas de Lifetime son más simples
 - Podemos usar variables del scope externo

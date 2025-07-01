@@ -1,6 +1,6 @@
 # Algoritmos No Bloqueantes
 
-Hasta ahora bloqueábamos el acceso (Mutex, Condvars, Locks) al resto de hilos para evitar condiciones de carrera.
+Hasta ahora bloqueábamos el acceso (`Mutex`, `Condvars`, `Locks`) al resto de hilos para evitar condiciones de carrera.
 Con este tipo de algoritmos vamos a tratar de resolver los problemas de los algoritmos bloqueantes, que son:
 
 - **Performance**: se reduce la performance bajo alta concurrencia, debido a tener que contener el **Lock**
@@ -17,11 +17,11 @@ Con este tipo de algoritmos vamos a tratar de resolver los problemas de los algo
 
 ### Rol
 
-- Operaciones atómicas
+- **Operaciones atómicas**
     - Se hacen en un único paso no divisible. No puedo tener el problema del lock porque no lo
       puedo "partir al medio".
-- Integridad de los datos: asegura integridad sin usar locks
-- Utilidad:
+- **Integridad de los datos**: asegura integridad sin usar locks
+- **Utilidad**:
     - Contadores y estadísticas
     - Implementaciones concurrentes "lockless" de estructuras de datos
 
@@ -50,6 +50,7 @@ public class AtomicCounter {
 - `getAndIncrement()`, `getAndDecrement()`, `getAndAdd(int delta)`
 - `getAndUpdate(IntUnaryOperator lambda)`:
     - `IntUnaryOperator` es una interfaz funcional que recibe un int y devuelve un int.
+      - Tiene una estructura como esta: `int func(int x)`
     - `getAndUpdate` aplica la función al valor actual y lo actualiza.
 
 ### En un lenguaje de verdad como Rust
@@ -91,8 +92,10 @@ Los órdenes son los siguientes:
     - Si se declara un acceso como `SeqCst`, ese acceso se queda anclado ahí.
     - No se pueden reordenar las operaciones de lectura y escritura.
     - `Java` lo usa por defecto.
+
 - `AcqRel`: combinación de Acquire y Release
   - Combina Acquire y Release en una operación de lectura-modificación-escritura (por ejemplo, fetch_add), ideal para estructuras de lock-free donde una sola operación hace ambas cosas. 
+
 - `Acquire`: más restrictivo que `Release`, pero menos que `AcqRel`
   - Asegura que ninguna lectura/escritura posterior al “load” pueda reordenarse antes de él. Se sincroniza con un `Release` correspondiente para “ver” los efectos previos al `store`.
   - Como se usa en conjunto con `Release`, lo que se busca (o al menos su caso de uso inicialmente intencionado) es "adquirir y liberar locks".
@@ -101,10 +104,12 @@ Los órdenes son los siguientes:
   - No hay ninguna garantía de que se las operaciones anteriores no se reordenen para ejecutarse después.
   - El caso de uso de estos 2 en conjunto es bastante simple:
     - Adquiero el "lock" al comenzar una sección crítica con `Acquire` y cuando termino lo libero usando `Release` (normalmente usando la operación atómica `store`).
+
 - `Release`: más restrictivo que `Relaxed`, pero menos que `Acquire`
   - Garantiza que ninguna lectura/escritura previa al “store” pueda reordenarse después de él. Permite publicar cambios en memoria antes de que otro hilo los observe con un `Acquire`.
   - Todos los accesos anteriores a un `Release` se van a ejecutar antes de este.
   - No hay ninguna garantía de que se las operaciones posteriores no se reordenen para ejecutarse antes.
+
 - `Relaxed`: menos restrictivo
   - Solo garantiza la atomicidad de la operación: no impone ningún orden relativo con otras lecturas o escrituras. Útil cuando solo importa el valor atómico, no la sincronización con otros datos.
 
@@ -167,8 +172,6 @@ class Stack<E> {
 
 ### Queue
 
-![A typical Queue implementation using a linked list](queue.png)
-
 ```kotlin
 class Queue<E> {
     class Node<E>(val item: E?, var next: Node<E>? = null)
@@ -191,6 +194,10 @@ class Queue<E> {
 ```
 
 ### Non-Blocking Concurrent Queue
+![A typical Queue implementation using a linked list](queue.png)
+La idea de esta implementación no bloqueante es poder completarle la operación a otro hilo, en caso de que se encuentre en un estado intermedio. Es decir, si tengo la `Queue` en el estado de la foto, donde tengo que mover el puntero, otro hilo puede **completarme la operación** si se da un _cambio de contexto_ .
+
+En el caso del Stack es lo mismo.
 
 ```kotlin
 import java.util.concurrent.atomic.AtomicReference
@@ -247,9 +254,9 @@ No es detectable por operaciones concurrentes, lo cual puede llevar a asunciones
     - ABA se vuelve A1 - B2 - A3.
 - En Java se puede usar `AtomicStampedReference`, que es una referencia atómica que incluye un "timestamp" o versión.
     - `ref.compareAndSet(currentValue, newValue, currentStamp, newStamp);`
-- En Rust no puede existir este problema. ¿Por qué?
-    - Por el borrow checker y por la inexistencia del Garbage Collector. No puedo tener una pasada del GC en el medio de
-      la operación.
+- En `Rust` no puede existir este problema. ¿Por qué?
+    - Por el borrow checker y por la inexistencia del _Garbage Collector_. **No puedo tener una pasada del GC** en el medio de la operación.
+    - Como no hay GC, no puedo limpiar "memoria vieja" ni quedarme apuntando a memoria inexistente.
 
 ## Pros y Contras de los Algoritmos No Bloqueantes
 

@@ -20,6 +20,8 @@
 
 - [Práctica](./Práctica/README.md)
   - [Primer Parcial](./Práctica/Primer%20Parcial/README.md)
+    - [Primer Parcial 2025](./Práctica/Primer%20Parcial/primer_parcial.md)
+    - [Recuperatorio Primer Parcial 2025](./Práctica/Primer%20Parcial/recu_primer_parcial.md)
     - [Ejercicios](./Práctica/Primer%20Parcial/Exercises.md)
   - [Segundo Parcial](./Práctica/Segundo%20Parcial/README.md)
     - [Ejercicios](./Práctica/Segundo%20Parcial/Exercises.md)

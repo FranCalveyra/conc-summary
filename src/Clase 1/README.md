@@ -27,77 +27,78 @@ Previo a hablar de programación concurrente, es importante entender el concepto
 - Se crea la ilusión de una máquina rápida y dedicada para cada usuario
 
 ## ¿Por qué aplicamos programación concurrente?
-- Uso de recursos: uso eficiente del tiempo de inactividad durante operaciones de entrada/salida.
-- Equidad: compartición equitativa de recursos entre múltiples usuarios o programas.
-- Conveniencia: facilita la gestión de múltiples tareas o procesos.
+- **Uso de recursos**: uso eficiente del tiempo de inactividad durante operaciones de entrada/salida.
+- **Equidad**: compartición equitativa de recursos entre múltiples usuarios o programas.
+- **Conveniencia**: facilita la gestión de múltiples tareas o procesos.
 
 [//]: # (Es necesario que hable de qué es un proceso?)
 
 ---
 
-[//]: # (## Scheduling)
+## Scheduling
 
-[//]: # (### Cooperativo)
+![Scheduling](scheduling.png)
 
-[//]: # (Tasks voluntarily yield control of the CPU, allowing other tasks to run.)
+### Cooperativo
 
-[//]: # (#### Key Characteristics)
+Las tareas ceden voluntariamente el control de la CPU, permitiendo que otras tareas se ejecuten.
 
-[//]: # (- Task Control: Tasks control their own relinquishment of the CPU.)
+#### Características Clave
 
-[//]: # (- Yielding: A task yields the CPU either when it's idle or when it decides to allow other tasks to run.)
+- **Control de Tarea**: Las tareas controlan su propia cesión de la CPU.
 
-[//]: # (- Advantages: Simplicity, low overhead, predictable resource utilization.)
+- **Cesión**: Una tarea cede la CPU cuando está inactiva o cuando decide permitir que otras tareas se ejecuten.
 
-[//]: # (- Challenges:)
+- **Ventajas**: Simplicidad, baja sobrecarga, utilización predecible de recursos.
 
-[//]: # (  - Relies on tasks to be well-behaved. )
+- **Desafíos**:
 
-[//]: # (  - A single misbehaving task can hog the CPU, affecting system responsiveness.)
+  - Depende de que las tareas se comporten correctamente.
 
-[//]: # (#### Ideal Use Cases)
+  - Una sola tarea mal comportada puede acaparar la CPU, afectando la capacidad de respuesta del sistema.
 
-[//]: # (- Environments where tasks can be trusted to yield regularly. )
+#### Casos de Uso Ideales
 
-[//]: # (- Systems prioritizing simplicity over multitasking efficiency.)
+- Entornos donde las tareas pueden ser confiables para ceder regularmente.
 
-[//]: # ()
-[//]: # (### Preemptive)
+- Sistemas que priorizan la simplicidad sobre la eficiencia del multitarea.
 
-[//]: # (The operating system controls the execution of tasks, forcibly interrupting and resuming them as needed to ensure fair and efficient resource allocation.)
 
-[//]: # (#### Key Characteristics)
+### Preventivo
 
-[//]: # (- Controlled by OS: The OS when a task should relinquish the CPU.)
+El sistema operativo controla la ejecución de las tareas, interrumpiendo y reanudándolas por la fuerza según sea necesario para garantizar una asignación justa y eficiente de recursos.
 
-[//]: # (- Time Slicing: Tasks have CPU time slices and are preempted when they exceed it.)
+#### Características Clave
 
-[//]: # (- Advantages: Improved responsiveness, fairness, better handling of real-time.)
+- **Controlado por SO**: El SO decide cuándo una tarea debe ceder la CPU.
 
-[//]: # (- Challenges:)
+- **Partición de Tiempo**: Las tareas tienen porciones de tiempo de CPU y son preemptadas cuando las exceden.
 
-[//]: # (  - Higher complexity in implementation.)
+- **Ventajas**: Mejor capacidad de respuesta, equidad, mejor manejo de tiempo real.
 
-[//]: # (  - Potential for resource contention and associated overhead.)
+- **Desafíos**:
 
-[//]: # (#### Ideal Use Cases)
+  - Mayor complejidad en la implementación.
 
-[//]: # (- General-purpose operating systems.)
+  - Potencial para contención de recursos y sobrecarga asociada.
 
-[//]: # (- Environments where tasks cannot be trusted to yield regularly.)
+#### Casos de Uso Ideales
 
-[//]: # (- Real-time systems needing guaranteed response times.)
-No creo que se meta con toda la parte de scheduling, al menos en el contexto teórico, así que no lo pongo. Lo dejo comentado por las dudas.
+- Sistemas operativos de propósito general.
+
+- Entornos donde las tareas no pueden ser confiables para ceder regularmente.
+
+- Sistemas de tiempo real que necesitan tiempos de respuesta garantizados.
 
 ---
 [//]: # (Dudo que se pongan en gedes con cómo funciona un Context Switch, pero lo agrego igual)
-# Context Switch
-- The process of saving the state of a currently running task and loading the state of another task.
+# Cambio de Contexto
+- El proceso de guardar el estado de una tarea actualmente en ejecución y cargar el estado de otra tarea.
 ![img.png](context_switch.png)
 ## ¿Qué guarda como estado?
-- Program Counter: dirección de la siguiente instrucción
-- Registros de la CPU en ese momento
-- Stack: variables locales, parámetros de funciones, y direcciones de retorno
+- **Program Counter**: dirección de la siguiente instrucción
+- **Registros de la CPU** en ese momento
+- **Stack**: variables locales, parámetros de funciones, y direcciones de retorno
 - Información de manejo de memoria y otros.
 
 ---
@@ -124,3 +125,34 @@ Una técnica para alternar rápidamente entre tareas, ejecutándolas en pequeño
 - Ejemplo: un chef que prepara múltiples platos alternando entre ellos, en lugar de cocinar cada uno de principio a fin.
 ### Contraste con Overlapping
 ![img.png](interleaving.png)
+
+## Procesos vs. Threads
+
+- **Programa**
+> Una colección de instrucciones y datos que pueden ser ejecutados por una computadora para realizar una tarea o función específica.
+
+- **Proceso**
+> Una instancia en ejecución de un programa. Es una unidad independiente que consiste en su propio espacio de direcciones, memoria, datos y recursos del sistema.
+
+- **Thread**
+> La unidad más pequeña de ejecución dentro de un proceso.\
+> Representa una secuencia única de instrucciones que puede ser programada por el scheduler del sistema.\
+> Múltiples hilos dentro de un proceso comparten el mismo espacio de memoria pero tienen su propio
+
+![process_vs_thread](process_vs_thread.png)
+
+
+### Tipos de threads
+- **User-Level**: El trabajo de gestión de hilos lo hace la aplicación y el kernel no es consciente de la existencia de estos hilos.
+- **Kernel-Level**: Todo el trabajo de gestión de hilos lo realiza el kernel. A nivel de aplicación hay una API para la funcionalidad de hilos del kernel.
+
+| Característica | Hilos a Nivel de Usuario | Hilos a Nivel de Kernel |
+|---|---|---|
+| Implementación | En espacio de usuario | En espacio de kernel |
+| Tiempo de Cambio de Contexto | Rápido | Más lento |
+| Sobrecarga/Consumo de Memoria | Bajo | Mayor |
+| Reconocimiento del SO | No reconocidos | Reconocidos |
+| Programación | Por biblioteca de nivel de usuario | Por kernel del SO |
+| Asignación de Recursos | No directa | Directa |
+| Bloqueo | Un hilo puede bloquear todo el proceso | Bloqueo independiente |
+| Rendimiento en Multi CPU | Limitado | Mejor |

@@ -15,6 +15,7 @@ mod philosophers;
 mod queue;
 mod race_conditions;
 mod channels;
+mod primer_parcial;
 
 fn main() {
     pipeline()

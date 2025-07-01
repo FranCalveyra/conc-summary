@@ -14,9 +14,106 @@ Un lock (o mutex de exclusión mutua) es una primitiva de sincronización que pr
 - **Reentrant Lock**: Puede ser adquirido múltiples veces por el mismo hilo sin causar un deadlock.
 - **Read/Write Locks**: Permite que múltiples lectores accedan al recurso simultáneamente, pero requiere acceso exclusivo para escritura.
 
-Acá en el medio pone el ejemplo de la cuenta de banco, de cómo estos 3 tipos de lock se pueden usar para este caso,
-etc. \
-Si quieren lo agrego, pero no creo que haga falta; a lo sumo haría falta un ejemplo del Reentrant.
+#### Ejemplos
+- Con `synchronized` sobre un objeto:
+```java
+class BankAccountSync {
+    private double balance;
+    private final Object lock = new Object();
+
+    public BankAccountSync(double initialBalance) {
+        this.balance = initialBalance;
+    }
+
+    // Synchronized method to deposit money
+    public void deposit(double amount) {
+        synchronized (lock) {
+            if (amount > 0) {
+                balance += amount;
+                System.out.println("Deposited: " + amount);
+            }
+        }
+    }
+
+    // Synchronized method to withdraw money
+    public void withdraw(double amount) {
+        synchronized (lock) {
+            if (amount > 0 && balance >= amount) {
+                balance -= amount;
+                System.out.println("Withdrawn: " + amount);
+            } else {
+                System.out.println("Insufficient balance for withdrawal");
+            }
+        }
+    }
+
+    public double getBalance() {
+        synchronized (lock) {
+            return balance;
+        }
+    }
+}
+```
+- `synchronized` sobre un **método**:
+```java
+class BankAccountSync {
+    private double balance;
+
+    public BankAccountSync(double initialBalance) {
+        this.balance = initialBalance;
+    }
+
+    // Synchronized method to deposit money
+    public synchronized void deposit(double amount) {
+        if (amount > 0) {
+            balance += amount;
+            System.out.println("Deposited: " + amount);
+        }
+    }
+
+    // Synchronized method to withdraw money
+    public synchronized void withdraw(double amount) {
+        if (amount > 0 && balance >= amount) {
+            balance -= amount;
+            System.out.println("Withdrawn: " + amount);
+        } else {
+            System.out.println("Insufficient balance for withdrawal");
+        }
+    }
+
+    public double getBalance() {
+        synchronized (this) {
+            return balance;
+        }
+    }
+}
+```
+- Con `Lock` del API de `Java`:
+```java
+class BankAccountWithLock implements BankAccount {
+    private double balance;
+    private final Lock lock = new ReentrantLock();
+
+    public BankAccountWithLock(double initialBalance) {
+        this.balance = initialBalance;
+    }
+
+    // Method to deposit money using Lock
+    public void deposit(double amount) {
+        lock.lock();
+        try {
+            if (amount > 0) {
+                balance += amount;
+                System.out.println("Deposited: " + amount);
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    // ... etc
+}
+```
 
 ![img.png](locks_vs_synch.png)
 
@@ -66,21 +163,17 @@ impl BankAccount {
 ## Livelock
 Es una condición que tiene lugar cuando 2 o más threads cambian su estado continuamente, sin que ninguno de ellos haga progreso.
 
-Esto lo hace ver con el ejemplo del `problema de los filósofos`, en la variante donde todos agarran primero el tenedor
-derecho y el último lo da vuelta (agarra el izquierdo).\
+Esto lo hace ver con el ejemplo del `problema de los filósofos`, en la variante donde todos agarran primero el tenedor derecho y el último lo da vuelta (agarra el izquierdo).
+
 Recordemos que en el caso donde todos intentan agarrar primero el derecho se produce un **deadlock**.
 
 ## Reader Writer Lock
-
-Also known as a shared-exclusive lock or a multiple readers/single writer lock.
 También conocido como un lock compartido-exclusivo o un lock de múltiples lectores/un único escritor.
 
-- Es un mecanismo de sincronización para manejar situaciones donde un recurso puede ser accedido por múltiples hilos
-  simultáneamente.
-- Este tipo de lock permite acceso concurrente de solo lectura al recurso compartido, mientras que las operaciones de
-  escritura requieren acceso exclusivo.
+- Es un **mecanismo de sincronización** para manejar situaciones donde **un recurso puede ser accedido por múltiples hilos** simultáneamente.
+- Este tipo de lock permite **acceso concurrente de solo lectura al recurso compartido**, mientras que las **operaciones de escritura requieren acceso exclusivo**.
 
-Son útiles en escenarios de alta concurrencia donde las lecturas son frecuentes y las escrituras son poco frecuentes.
+Son útiles en escenarios de alta concurrencia donde las **lecturas son frecuentes** y las **escrituras son poco frecuentes**.
 
 1. Múltiples threads pueden sostener el lock de lectura simultáneamente, siempre y cuando ningún thread sostenga el lock de escritura.
 2. Solo un thread puede sostener el lock de escritura a la vez. Cuando un thread sostiene el lock de escritura, ningún otro thread puede sostener el lock de lectura o escritura.
@@ -140,4 +233,39 @@ public class Counter {
     }
 }
 ```
+### Implementación de un semáforo
+```java
+class Semaphore {
+    private boolean lock;
+    private int count;
+    private Queue<Thread> q;
 
+    public Semaphore(int init) {
+        lock = false;
+        count = init;
+        q = new Queue();
+    }
+
+    public void down() {
+      while (lock.testAndSet()) { /* just spin */ }
+      if (count > 0) {
+        count--;
+        lock = false;
+      }
+      else {
+        q.add(currrentThread);
+        lock = false;
+        suspend();
+      }
+    }
+
+    public up() {
+      while (lock.testAndSet()) { /* just spin */ }
+      if (q == empty) count ++;
+      else q.pop().wakeUp();
+      lock = false;
+    }
+
+}
+
+```

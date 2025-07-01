@@ -10,6 +10,7 @@ Varios threads se pisan entre sí. Esto se resuelve:
 - Demarcando regiones de código con semánticas para "no molestar"
 - Asegurando que el acceso a estado compartido sea protegido
 
+En `Scala` todos los objetos tienen un lock: `synchronized {...}`
 ```scala
 class BankAccount {
   private var balance = 0
@@ -38,7 +39,7 @@ Un actor es:
 - Que tiene comportamiento
 - Y solo interactúa usando pasaje de mensajes asincrónico
 
-Es OOP + Mensajes, en definitiva. Forzado dentro de un sistema donde todo tiene que seguir este estándar.
+Es `OOP` + `Mensajes`, en definitiva. Forzado dentro de un sistema donde todo tiene que seguir este estándar.
 
 ## Actor trait
 
@@ -105,9 +106,9 @@ class Counter extends Actor {
 ```
 
 - `!` es el operador para mandar mensajes en `Akka`
-    - Akka es la librería de Scala para actores
+    - `Akka` es la librería de `Scala` para _actores_
 - `customer` es un `ActorRef`
-    - get le manda el count a un actor que puede recibir un entero en su método `receive`
+    - get le manda el count a un actor que puede recibir un entero (`int`) en su método `receive`
 
 #### Ejemplo para apoyar lo anterior
 
@@ -184,7 +185,6 @@ class Counter extends Actor {
 ```
 
 Un ejemplo para verlo de afuera sería:
-> Nota: este ejemplo me lo crafteé yo
 
 ```scala
 class Multiplier extends Actor {
@@ -200,8 +200,7 @@ counter ! "incr"
 multiplier ! ("ask", counter) // --> esto va a multiplicar por 2 recursivamente de manera infinita el valor de counter
 // El flujo va a ser multiplier ask => counter get => le mando count al multiplier => Multiplier se llama a sí mismo recursivamente hasta que sea mayor a 10
 ```
-
-[//]: # (Más slides)
+> Nota: este ejemplo me lo crafteé yo
 
 ### Interactuando con el Printer
 
@@ -411,11 +410,11 @@ Este modelo fuerza aislamiento y previene problemas de memoria compartida como c
 
 ## Trade-Offs
 
-> Esto lo anoté en base a lo que me dijeron los profes
-
 - Te atás al asincronismo, no tenés respuestas inmediatas
 - No existe memoria compartida (**esto es importante**)
     - Cada actor tiene sus propias variables y espacios de memoria alocados
     - Solo se comparte memoria a través de mensajes
 - Añade una capa de complejidad importante
     - Es más difícil de debuggear
+
+> Esto lo anoté en base a lo que me dijeron los profes

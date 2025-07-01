@@ -2,7 +2,7 @@
 
 En qué beneficia hacer Garbage Collections atómicos, chiquitos y periódicos contra una pasada grande?
 
-- Dependiendo de si las variables se alocan en el Heap o en el Stack (en el caso de la barrida enorme):
+- Dependiendo de si las variables se alocan en el **Heap** o en el **Stack** (en el caso de la barrida enorme):
     - Si se alocan en el Stack, todo pelota, no pasa natalia
     - Si se alocan en el Heap, hay que revisar (como si fuese un grafo, porque justamente se aloca un puntero a ese
       elemento), el cual puede terminar teniendo más referencias, te comés el garrón de revisar toda la memoria
@@ -10,9 +10,7 @@ En qué beneficia hacer Garbage Collections atómicos, chiquitos y periódicos c
         - Traducido a un programa interactivo o In Real Time, ves la ruedita cargando, o se te caga la performance, en
           definitiva
 
-En este sentido, como el Garbage Collection en el modelo de Actores se hace por actor, se cae en el caso más optimizado,
-o mejor dicho, \
-dejás de tener todas las complicaciones que tiene el primer caso.
+En este sentido, como el Garbage Collection en el modelo de Actores se hace por actor, se cae en el caso más optimizado, o mejor dicho, dejás de tener todas las complicaciones que tiene el primer caso.
 
 ## Bank Account - Revisitado con actores
 
@@ -37,20 +35,22 @@ class BankAccount extends Actor {
   var balance: BigInt = BigInt(0)
 
   def receive: Receive = {
+    
     case Deposit(amount) =>
       balance += amount
       sender ! Done
+    
     case Withdraw(amount) if amount <= balance =>
       balance -= amount
       sender ! Done
+
     case _ => sender ! Failed
   }
 }
 ```
 
 - El pattern matching se hace por el tipo de objeto, en este caso
-- El if en el caso del `Withdraw` hace que falle (o lo deriva al caso default, mejor dicho) si `amount` es **mayor**
-  a `balance`
+- El if en el caso del `Withdraw` hace que falle (o lo deriva al caso default, mejor dicho) si `amount` es **mayor** a `balance`
 
 ### Colaboración de actores
 
@@ -124,15 +124,15 @@ Dependiendo del caso se implementa uno u otro protocolo, y un manejo de estados 
 
 - **at-most-once**: enviar el mensaje lo entrega 0 o 1 veces
     - Puede no llegar
-- **at-least-once**: enviar el mensaje entrega 1 - N veces el mensaje
+- **at-least-once**: enviar el mensaje entrega `1 - N` veces el mensaje
     - Llega una o más veces
-- **exactly-once**: procesar sólo la primera recepción entrega el mensaje 1 vez
+- **exactly-once**: procesar sólo la primera recepción entrega el mensaje exactamente 1 vez
     - Este approach es muchísimo más burocrático
     - Es más caro en recursos y en implementación
     - Tenés que:
         - Recibir el mensaje efectivamente
-        - Mandar un ACK para notificarle al otro que recibiste el mensaje
-        - Que el otro te mande un ACK para notificarte que recibió el ACK
+        - Mandar un `ACK` para notificarle al otro que recibiste el mensaje
+        - Que el otro te mande un `ACK` para notificarte que recibió el `ACK`
 
 ### Mensajería confiable
 
@@ -178,7 +178,7 @@ Si uno quiere hacer un diseño razonable con actores, tiene que pensar por este 
 > Abrazar el fallo antes que prevenirlo (?)
 
 - Se esperan errores en sistemas distribuidos
-- La Programación Defensiva lleva a complejidad y rigidez
+- La **Programación Defensiva** lleva a complejidad y rigidez
 - El modelo de actores aísla fallas: los actores crashean y restartean sin afectar otros
 
 > En Erlang/Elixir: "fail fast, recover quickly"

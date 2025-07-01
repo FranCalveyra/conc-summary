@@ -51,7 +51,7 @@ fun makeCoffee(): Coffee {
     return Coffee()
 }
 
-fun drink(coffee: Coffee) { }
+fun drink(coffee: Coffee) { ... }
 ```
 
 #### Solución usando Callbacks
@@ -79,7 +79,7 @@ fun drink(coffee: Coffee) { }
 
 ## De Sync hacia Async
 
-Para transformar una función de Sync a `async` (o al menos su firma), se debe:
+Para transformar una función de `sync` a `async` (o al menos su firma), se debe:
 
 - No devolver un valor
 - Tomar como parámetro una **continuación** que defina qué hacer una vez devuelto el valor computado.
@@ -92,7 +92,7 @@ fun program(a: A): B {
 }
 ```
 
-Se lo transforma en CSP (Continuous Passing Style)
+Se lo transforma en **CSP** (Continuous Passing Style)
 
 ```kotlin
 fun asyncProgram(a: A, c: (B) -> Unit) {
@@ -124,15 +124,16 @@ fun conference() {
 ```
 
 Esto se vuelve ilegible, en definitiva. Escala muy poco.
+También se lo llama **"The doom pyramid"**
 
 ## Futures
 
-Es análogo al `Promise` de `JS/TS`. Es una "promesa" o un registro de que se llamó a una función asíncrona, por así
-decirlo.
+Es análogo al `Promise` de `JS/TS`. Es una "promesa" o un registro de que se llamó a una función asíncrona, por así decirlo.
 
 Este Future va a devolver un valor en algún momento (cuando quiera usar el valor).
 
 Se propaga "para arriba" en la jerarquía de llamados el cuándo espero por el valor.
+Es decir, si yo me quedo esperando por un valor asíncrono (por un `Promise`), la función donde espero por dicho valor se vuelve **asíncrona**.
 
 En el caso del ejemplo del café, se hace cuando quiera tomar el café, por ejemplo.
 
@@ -175,7 +176,7 @@ add x y = x + y
 -- El tipo de `add 10` va a ser:
 add 10 :: Num a => a -> a
 ```
-- En Haskell yo me puedo guardar una función en una variable con un parámetro con un valor "por default", e invocarla en otro lado.
+- En Haskell yo me puedo guardar una función en una variable con un parámetro con un valor "por default", e invocarla en otro lado. Es decir, **"invocarla parcialmente"**.
 - Justamente eso es Currying.
 
 ### Ejemplo del Café usando `Future`
@@ -244,7 +245,8 @@ fun futureCoffeeBreakBlended() {
 ```
 
 ### En definitiva, los `Futures` son `Monads`
-Cabe recordar que un `Monad` en `Haskell` es una interfaz para poder definir operaciones de cómputo en términos de valores y secuencias de cómputo usando valores tipados.
+Cabe recordar que un `Monad` en `Haskell` es una interfaz para wrappear valores en un contexto, y operar con los valores internos del contexto.
+Recordar el tipo `Maybe a = Just a | Nothing `.
 
 ```haskell
 blendedCoffee = 

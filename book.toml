@@ -9,3 +9,4 @@ title = "Resumen Programacion Concurrente"
 after = ["links"]
 
 [output.html]
+theme = "theme"

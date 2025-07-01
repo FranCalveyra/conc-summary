@@ -54,12 +54,12 @@ async function coffeeBreak(): Promise<void> {
 
 ## Corutinas
 
-- Subrutinas vs. Corutinas
-    - Las funciones (o llamados a estas) que conocemos en definitiva son subrutinas
-    - Subrutinas: 1 entrada, 1 salida
-    - Corutinas: N puntos de entrada, puede pausarse y reanudarse
-- Ceder ejecución
-    - Las corutinas pueden cederle el control de vuelta a los "callers", que son quienes la invocan
+- **Subrutinas vs. Corutinas**
+    - Las funciones (o llamados a estas) que conocemos en definitiva son _subrutinas_
+    - _Subrutinas_: 1 entrada, 1 salida
+    - _Corutinas_: N puntos de entrada, puede pausarse y reanudarse
+- **Ceder ejecución**
+    - Las _corutinas_ pueden cederle el control de vuelta a los "callers", que son quienes la invocan
     - Reanudan desde el punto donde las pausaron
       ![img.png](coroutine.png)
 
@@ -85,11 +85,11 @@ fun coffeeBreakWithCoroutines() = runBlocking {
 }
 ```
 
-- `suspend` indica que es una función que se puede suspender, ergo, una `coroutine`
+- `suspend` indica que es una función que se puede suspender, ergo, es una `coroutine`
 - Una corutina puede llamar otra dentro suyo
     - Por adentro pueden alocarlas distintos threads
     - Si la aloca el mismo thread, el flujo se sigue de la siguiente manera:
-        - Va al Launch, empieza la corutina
+        - Va al `Launch`, empieza la corutina
         - Empieza a ejecutar
         - Hace un yield en el delay de `makeCoffee()` e invoca `chatWithColleagues()`
         - Vuelve a `makeCoffee()`, devuelve el valor, y ejecuta el `drink(coffee)` de la `main routine`
@@ -97,20 +97,18 @@ fun coffeeBreakWithCoroutines() = runBlocking {
 - En una corutina se puede ceder el control usando `return` o `yield`.
     - `return` es implícito, `yield` es explícito
 
-Las corutinas están pensadas para que, en un mismo hilo, yo pueda tener una ejecución paralela que se realiza con un
-interleaving.
+Las corutinas están pensadas para que, en un mismo hilo, yo pueda tener una ejecución paralela que se realiza con un interleaving.
 Es una forma colaborativa de tener concurrencia, similar a los `virtual threads`.
 
-En runtime (en el caso particular de Kotlin) te permite tener un dispatcher, al que se le pueden alocar a varios
-threads.
+En runtime (en el caso particular de `Kotlin`) se permite tener un dispatcher, al que se le pueden alocar a varios threads.
 El dispatcher te permite que una corutina no necesariamente se quede esperando.
 
 ### Beneficios
 
-- Código más simple
+- **Código más simple**
     - Código asíncrono que parece síncrono
     - Más fácil de leer y mantener
-- Concurrencia
+- **Concurrencia**
     - Se pueden manejar múltiples tareas de manera concurrente
     - Evita la complejidad de threads
     - Muy liviano
@@ -130,11 +128,11 @@ fun main() = runBlocking {
 
 Si no estuviera el `launch`, tardaría aproximadamente 250.000 segundos
 
-Como existe el launch, tarda un poquito más de 5 segundos (por lo que tarda en imprimir, también) por el cambio entre
-las rutinas, ya que hace el "salto" justo antes del `delay`.
+Como existe el launch, tarda un poquito más de 5 segundos (por lo que tarda en imprimir, también) por el cambio entre las rutinas, ya que hace el "salto" justo antes del `delay`.
+
 Se interrumpe y salta a la siguiente corutina justo antes del llamado al delay.
 
-## Secuencias (colección Lazy)
+## Secuencias (colecciones Lazy)
 
 No tiene que ver de manera directa con concurrencia, pero es la forma más pura de escribir una corutina.
 
@@ -159,7 +157,8 @@ fun main() = fibonacciSeq.take(10).forEach { print("$it ") }
 
 - `sequence` invoca una lambda y la irá llamando a medida que se lo pida.
     - Producen elementos a pedido (lazy)
-    - Esa lambda es una corutina, en definitiva.
+    - Esa lambda es una corutina, en definitiva. 
+    - Puedo interrumpir la secuencia usando `seq.take(N)`.
 - Si no se usa con `sequence`, se debería armar usando un `Iterator`
 - `yield` funciona parecido a `return` pero no finaliza la corutina. Simplemente la interrumpe.
     - Cuando se vuelve a llamar la corutina, sigue desde el punto siguiente al `yield`.
