@@ -25,4 +25,5 @@
     - [Ejercicios](./Práctica/Primer%20Parcial/Exercises.md)
   - [Segundo Parcial](./Práctica/Segundo%20Parcial/README.md)
     - [Ejercicios](./Práctica/Segundo%20Parcial/Exercises.md)
-    - [Resolución 2do Parcial 2024](./Práctica/Segundo%20Parcial/resolucion_2do_parcial_2024.md)
+    - [Segundo Parcial 2024](./Práctica/Segundo%20Parcial/resolucion_2do_parcial_2024.md)
+    - [Segundo Parcial 2025](./Práctica/Segundo%20Parcial/resolucion_2do_parcial_2025.md)

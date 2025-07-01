@@ -1,4 +1,8 @@
-# 1 - NonBlocking Algorithms
+# Segundo Parcial 2024
+![Segundo Parcial](./assets/segundo_parcial.png)
+
+# Resolución
+## 1 - NonBlocking Algorithms
 Completar el siguiente código para que funcione el `pop` de una implementación no bloqueante de un `Stack` concurrente
 
 ```kotlin
@@ -10,7 +14,7 @@ fun pop(): E {
 }
 ```
 
-## Respuesta:
+### Respuesta:
 ```kotlin
 fun pop(): E {
     var oldHead: Node<E>? = top.get()
@@ -20,8 +24,8 @@ fun pop(): E {
 }
 ```
 
-# 2 - Garantías de Message Passing en el sistema de actores
-## Respuesta:
+## 2 - Garantías de Message Passing en el sistema de actores
+### Respuesta:
 >Nota: para estos ejemplos yo voy a ser el remitente y Juan va a ser el receptor en todos los casos
 
 Las 3 garantías que existen son:
@@ -38,7 +42,7 @@ Las 3 garantías que existen son:
   - Se usa sólo el espacio que ocupa este mensaje
   - Para garantizar esto, se requieren IDs únicos para trackear los mensajes que se intercambian
 
-# 3 - Ejemplo de Actores
+## 3 - Ejemplo de Actores
 ```scala
 class Fib extends Actor{
     def fib(prev: Int, last: Int): Receive = {
@@ -49,7 +53,7 @@ class Fib extends Actor{
     def receive = fib(0, 1)
 }
 ```
-## a) Qué recibiríamos si mandamos los siguientes mensajes?
+### a) Qué recibiríamos si mandamos los siguientes mensajes?
 ```scala
 fib ! "get"; fib ! "incr"; fib ! "incr"; fib ! "get"; fib ! "incr"; fib ! "get";
 ```
@@ -61,7 +65,7 @@ La secuencia sería la siguiente:
 5. No se recibe nada, se incrementa y el actor pasa a ser `fib(2, 3)`
 6. Se recibe `5`
 
-## b) Y si mandamos estos mensajes?
+### b) Y si mandamos estos mensajes?
 ```scala
 fib ! "incr"; fib ! "incr"; fib ! "incr"; fib ! "boom"; fib ! "get" 
 ```
@@ -75,7 +79,7 @@ La secuencia sería la siguiente (suponiendo que arranca de 0):
    - Planear otra estrategia custom
 5. Se recibe `1`, porque se reinició el estado del actor (está en estado `fib(0, 1)`)
 
-# 4 - Corutinas
+## 4 - Corutinas
 Qué hace? Cómo funciona?
 ```kotlin
 val mystery: Sequence<Int> = sequence {
@@ -110,7 +114,7 @@ n \times \mathrm{fact}(n-1), & n > 0.
 
 $$
 
-# 5 - Qué es un `Future` y qué problemas resuelve?
+## 5 - Qué es un `Future` y qué problemas resuelve?
 Un Future es objeto que representa un "registro" de que se llamó a una función asíncrona. Representa el valor eventual que va a devolver esa función asíncrona.
 
 Encapsula el resultado una función que se ejecuta de manera asíncrona, que se puede ejecutar en paralelo y, en algún momento, devolver un valor.
@@ -127,7 +131,7 @@ Viene a resolver problemas competentes al contexto de la programación concurren
   - Justamente el `Future` permite escribir de manera más prolija esos llamados asíncronos a funciones.
 
 
-## Ejemplo en pseudocódigo (en Kotlin)
+### Ejemplo en pseudocódigo (en Kotlin)
 Supongamos que nos levantamos a la mañana y nuestra rutina implica:
 - Tomar un baño
 - Hacer el desayuno (implica un café y 2 tostadas)
