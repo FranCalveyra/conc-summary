@@ -47,6 +47,7 @@ impl Airport {
             runways = self.can_land.wait(runways).unwrap();
         }
         let free_runway: &Runway = runways.iter().find(|r| !r.is_occupied).unwrap();
+        free_runway.is_occupied = true;
         free_runway.id
     }
 
@@ -87,7 +88,7 @@ fn request_runway(plane: Plane){
         }
     }
     let free_runway: &Runway = runways.iter().find(|r| !r.is_occupied).unwrap();
-    plane.can_land.notify_one();
+    free_runway.is_occupied = true;
     free_runway.id
 }
 
