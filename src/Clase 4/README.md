@@ -257,7 +257,7 @@ void increment() {
   - Después de girar un poco (spinning), **devolver el control al sistema operativo**.
   - `while (lock.compareAndSet(false, true)) Thread.yield();`
 
-Por último dice que Rust no puede tener condiciones de carrera porque es un lenguaje de verdad y el borrow checker lo evita (al menos con una variable mutable).
+Por último, en clase vimos que Rust no puede tener condiciones de carrera porque es un lenguaje de verdad y el borrow checker lo evita (al menos con una variable mutable).
 
 En casos más complejos lo resuelve de otra manera.
 
@@ -277,3 +277,39 @@ error[E0499]: cannot borrow `counter` as mutable more than once at a time
 
 ... Etc..
 ```
+
+Sin embargo, [según la documentación de Rust](https://doc.rust-lang.org/nomicon/races.html#:~:text=However%20Rust%20does%20not%20prevent%20general%20race%20conditions.&text=For%20this%20reason%2C%20it%20is,race%20condition%20or%20resource%20race.), el lenguaje previene específicamente Data Races, un subtipo de condiciones de carrera donde:
+- Dos o más threads acceden concurrentemente un espacio de memoria
+- Una o más de ellas es una escritura
+- Una o más de ellas no está sincronizada
+
+Y dicha prevención proviene justamente de lo explicado anteriormente respecto al borrow checker.
+
+Sin embargo, no nos protege de condiciones de carrera en general. Por ejemplo, veamos el siguiente caso:
+
+```rust
+fn main() {
+    let data = vec![1, 2, 3, 4];
+
+    let idx_mutex = Arc::new(Mutex::new(0));
+    let other_idx_mutex = Arc::clone(&idx_mutex);
+
+    let _ = thread::spawn(move || {
+        let mut current_idx = other_idx_mutex.lock().unwrap();
+        *current_idx += 10;
+    });
+
+    let current_index_value;
+    {
+        let idx_guard = idx_mutex.lock().unwrap();
+        current_index_value = *idx_guard;
+    }
+
+    println!("{}", data[current_index_value]);
+}
+```
+
+- Si el thread principal se termina de ejecutar y luego corre el thread que él mismo inicializa, el print funciona, mostrando el primer elemento del Vec.
+- En cambio, si ese segundo thread logra ejecutarse primero, entonces `current_index_value = 10`. Esto provoca un panic en el print, ya que se intenta acceder al elemento 10 del Vec, pero solo tiene 4 elementos.
+
+En consecuencia, se da una condición de carrera porque el programa puede ser exitoso o fallar dependiendo del orden de ejecución de los threads.
