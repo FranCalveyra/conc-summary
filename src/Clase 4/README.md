@@ -280,8 +280,8 @@ error[E0499]: cannot borrow `counter` as mutable more than once at a time
 
 Sin embargo, [según la documentación de Rust](https://doc.rust-lang.org/nomicon/races.html#:~:text=However%20Rust%20does%20not%20prevent%20general%20race%20conditions.&text=For%20this%20reason%2C%20it%20is,race%20condition%20or%20resource%20race.), el lenguaje previene específicamente Data Races, un subtipo de condiciones de carrera donde:
 - Dos o más threads acceden concurrentemente un espacio de memoria
-- Una o más de ellas es una escritura
-- Una o más de ellas no está sincronizada
+- Uno o más de ellos realiza una operación de escritura
+- Uno o más de ellos no está sincronizado
 
 Y dicha prevención proviene justamente de lo explicado anteriormente respecto al borrow checker.
 
