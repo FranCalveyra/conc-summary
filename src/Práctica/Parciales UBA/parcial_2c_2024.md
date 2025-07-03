@@ -80,7 +80,7 @@ Diseñe el sistema utilizando el modelo de actores, y para cada entidad defina c
 
 ## Resolución
 ### Primer ejercicio
-1. **No es un busy wait**. Si le llega un stream por TCP, le genera una respuesta. Si no, duerme el thread y no consume recursos innecesarios.
+1. **Es un busy wait**. Si le llega un stream por TCP, le genera una respuesta. Si no, duerme el thread hasta poder volver a intentar. Intenta hasta generar una respuesta,.
 2. **Es un busy wait**. Además de que es una implementación ineficiente (porque duerme el thread de manera innecesaria una cantidad de tiempo aleatoria), se queda esperando e iterando indefinidamente por el estado de los ACKs pendientes. Nunca droppea el lock para que otro thread pushee un ACK al arreglo.
 3. **No es un busy wait**, no pregunta por el estado del cobre, sino que independientemente del resultado (es decir, si pudo adquirir el lock para ejecutar o no), duerme el thread para no seguir consumiendo recursos.
 
@@ -88,17 +88,20 @@ Diseñe el sistema utilizando el modelo de actores, y para cada entidad defina c
 Red de Petri, skippeado
 
 ### Tercer ejercicio
-
+Si quieren háganlo, tengo una idea de cómo hacerlo pero no lo pienso hacer. Es un bodrio.
 
 ### Cuarto ejercicio
 
 a) **Falso.** Cada proceso tiene su propio espacio de memoria; los hilos usan y comparten el espacio de memoria de su proceso padre, y las tareas asincrónicas son "hilos más ligeros", por lo que también usan el mismo espacio de memoria.
 
-b) **Verdadero.** Esto tiene que ver con el scheduling preventivo, que constaba de que un proceso puede ser interrumpido o terminado en un momento dado por parte del scheduler. Las tareas asíncronas tienen el mismo comportamiento
+b) **Falso.** (La justificación es muy puntual de cómo funcionan las tasks en Rust).
 
-c) **Verdadero.** (No sé cómo justificarlo)
+En nuestro caso...
+**Sería verdadera**. Esto tiene que ver con el scheduling preventivo, que constaba de que un proceso puede ser interrumpido o terminado en un momento dado por parte del scheduler. Las tareas asíncronas tienen el mismo comportamiento.
 
-d) **Verdadero.** Las tareas se caen a los pedazos para procesamientos pesados.
+c) **Falso.** Las tasks comparten el stack del proceso/hilo padre.
+
+d) **Falso.** El cambio de contexto entre hilos es más pesado que el de las tareas.
 
 ### Quinto ejercicio
 
