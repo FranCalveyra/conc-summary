@@ -1,10 +1,10 @@
 ## Temas a evaluar
-- [Teoría del principio (introducción a prog concurrente, scheduling, etc.)](../../Clase%201/README.md)
-- [Thread Programming](../../Clase%202/README.md)
-- [Paralelismo](../../Clase%203/README.md)
-- [Exclusión Mutua](../../Clase%204/README.md)
-- [Abstracciones de concurrencia I (Locks, Deadlocks, Livelocks, Semáforos)](../../Clase%205/README.md)
-- [Abstracciones de concurrencia II (CondVars, Monitores, Pasaje de mensajes con Channels)](../../Clase%206/README.md)
+- [Teoría del principio (introducción a prog concurrente, scheduling, etc.)](../../Clase%201/index.html)
+- [Thread Programming](../../Clase%202/index.html)
+- [Paralelismo](../../Clase%203/index.html)
+- [Exclusión Mutua](../../Clase%204/index.html)
+- [Abstracciones de concurrencia I (Locks, Deadlocks, Livelocks, Semáforos)](../../Clase%205/index.html)
+- [Abstracciones de concurrencia II (CondVars, Monitores, Pasaje de mensajes con Channels)](../../Clase%206/index.html)
 
 ## Notas
 - Esta práctica incluye los ejercicios que vimos en clase. También están subidos y resueltos los ejercicios del parcial y del primer recuperatorio.
