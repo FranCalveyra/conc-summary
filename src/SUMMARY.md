@@ -27,3 +27,6 @@
     - [Segundo Parcial 2024](./Práctica/Segundo%20Parcial/resolucion_2do_parcial_2024.md)
     - [Segundo Parcial 2025](./Práctica/Segundo%20Parcial/resolucion_2do_parcial_2025.md)
     - [Ejercicios](./Práctica/Segundo%20Parcial/Exercises.md)
+  - [Parciales UBA](./Práctica/Parciales%20UBA/README.md)
+    - [Parcial 1C 2024](./Práctica/Parciales%20UBA/parcial_1c_2024.md)
+    - [Parcial 2C 2024](./Práctica/Parciales%20UBA/parcial_2c_2024.md)
