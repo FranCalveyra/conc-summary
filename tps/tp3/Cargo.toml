@@ -1,0 +1,8 @@
+[package]
+name = "tp3"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+connection-handler={path="../connection-handler"}
+thread_pool={path="../thread_pool"}

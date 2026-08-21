@@ -1,0 +1,7 @@
+[package]
+name = "tp1"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+connection-handler={path="../connection-handler"}
