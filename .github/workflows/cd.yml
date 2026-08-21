@@ -28,6 +28,15 @@ jobs:
           mdbook-version: 'latest'
       - name: Install mdbook-katex
         run: cargo install mdbook-katex --version 0.10.0-alpha
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build Marp presentation
+        run: |
+          npx --yes @marp-team/marp-cli@latest \
+            tps/docs/presentation/presentation.md \
+            -o src/TPs/presentation.html --html
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Build with mdBook

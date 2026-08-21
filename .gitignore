@@ -11,3 +11,5 @@ conc-summary.iml
 **/out/
 .DS_Store
 book
+# generado por marp-cli en CI
+src/TPs/presentation.html

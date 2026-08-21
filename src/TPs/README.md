@@ -24,6 +24,9 @@ fuera de `src/`, para no arrastrar los recursos de prueba al sitio publicado.
 
 ## Presentación
 
-Estos capítulos se derivan de la presentación de cierre de la materia, que se
-conserva íntegra en formato [Marp](https://marp.app):
-[`tps/docs/presentation/presentation.md`](https://github.com/FranCalveyra/concurrent-programming/blob/main/tps/docs/presentation/presentation.md).
+Estos capítulos se derivan de la [presentación de cierre](./presentacion.md) de
+la materia, que se conserva íntegra y se publica junto con el libro.
+
+## Código
+
+El índice completo de crates está en [Código fuente](./codigo.md).
