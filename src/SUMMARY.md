@@ -30,3 +30,14 @@
   - [Parciales UBA](./Práctica/Parciales%20UBA/README.md)
     - [Parcial 1C 2024](./Práctica/Parciales%20UBA/parcial_1c_2024.md)
     - [Parcial 2C 2024](./Práctica/Parciales%20UBA/parcial_2c_2024.md)
+
+# Trabajos Prácticos
+
+- [Trabajos Prácticos](./TPs/README.md)
+  - [TP 1 - Servidor de Leibniz](./TPs/tp1.md)
+  - [TP 2 - Un hilo por conexión](./TPs/tp2.md)
+  - [TP 3 - Thread Pool](./TPs/tp3.md)
+  - [TP 4 - Análisis de logs](./TPs/tp4.md)
+  - [TP 5 - Cola no bloqueante](./TPs/tp5.md)
+  - [TP Grep - Búsqueda concurrente](./TPs/tp-grep.md)
+  - [TP 7 - Async vs threads](./TPs/tp7.md)
